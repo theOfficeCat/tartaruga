@@ -1,0 +1,30 @@
+module fetch
+    import tartaruga_pkg::*;
+(
+    input logic clk_i,
+    input logic rstn_i,
+    output bus32_t instr_o
+);
+
+    // PC logic
+    bus32_t pc_d, pc_q;
+
+    always_ff @(posedge clk_i, negedge rstn_i) begin
+        if (~rstn_i) begin
+            pc_q <= '0;
+        end
+        else begin
+            pc_q <= pc_d;
+        end
+    end
+
+    assign pc_d = pc_q + 4;
+
+    // Instruction memory
+    dummy_imem dummy_imem_inst (
+        .clk_i(clk_i),
+        .rstn_i(rstn_i),
+        .pc_i(pc_q),
+        .instr_o(instr_o)
+    );
+endmodule

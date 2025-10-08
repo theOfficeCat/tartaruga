@@ -1,0 +1,6 @@
+includes/tartaruga_pkg.sv
+
+rtl/top.sv
+rtl/datapath/datapath.sv
+rtl/datapath/fetch/fetch.sv
+rtl/datapath/fetch/dummy_imem.sv

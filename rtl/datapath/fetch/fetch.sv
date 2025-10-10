@@ -3,7 +3,8 @@ module fetch
 (
     input logic clk_i,
     input logic rstn_i,
-    output bus32_t instr_o
+    output bus32_t pc_o,
+    output instruction_t instr_o
 );
 
     // PC logic
@@ -20,6 +21,8 @@ module fetch
 
     assign pc_d = pc_q + 4;
 
+    assign pc_o = pc_q;
+
     // Instruction memory
     dummy_imem dummy_imem_inst (
         .clk_i(clk_i),
@@ -27,4 +30,5 @@ module fetch
         .pc_i(pc_q),
         .instr_o(instr_o)
     );
+
 endmodule

@@ -88,6 +88,7 @@ module decoder
                 instr_decoded_o.addr_rs2 = '0;
                 instr_decoded_o.addr_rd = '0;
                 instr_decoded_o.alu_op = ADD;
+                instr_decoded_o.alu_or_mem = ALU;
             end
         endcase
     end

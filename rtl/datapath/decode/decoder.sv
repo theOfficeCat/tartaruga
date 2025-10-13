@@ -53,7 +53,7 @@ module decoder
                 instr_decoded_o.store_to_mem = 1'b0;
 
                 case (instr_i.rtype.func3)
-                    F3_ADDI: begin
+                    F3_ADD: begin
                         instr_decoded_o.alu_op = ADD;
                     end
                     default: begin

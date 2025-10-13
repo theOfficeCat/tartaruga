@@ -11,6 +11,9 @@ module immediate
             OP_LUI, OP_AUIPC: begin
                 imm_o = {{12{instr_i.instr.utype.imm[31]}}, instr_i.instr.utype.imm};
             end
+            OP_ALU_I: begin
+                imm_o = {{20{instr_i.instr.itype.imm[31]}}, instr_i.instr.itype.imm};
+            end
             default: begin
                 imm_o = '0;
             end

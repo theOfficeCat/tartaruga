@@ -37,3 +37,12 @@ Salto a posicion de memoria 3090 (0xC12). Por ahora sera una NOP
 
 - Testbenches de modulos
 - Entorno de testing del core
+
+## Assembler
+
+[https://riscvasm.lucasteske.dev/#](https://riscvasm.lucasteske.dev/#)
+
+## Instructions information
+
+[https://msyksphinz-self.github.io/riscv-isadoc/html/rvi.html#sw](https://msyksphinz-self.github.io/riscv-isadoc/html/rvi.html#sw)
+

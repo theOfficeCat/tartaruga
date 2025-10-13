@@ -76,6 +76,7 @@ package tartaruga_pkg;
         alu_op_t alu_op;
 
         alu_or_mem_t alu_or_mem;
+        logic store_to_mem;
     } instr_data_t;
 
     typedef struct packed {
@@ -87,7 +88,13 @@ package tartaruga_pkg;
 
     typedef struct packed {
         instr_data_t instr;
+        bus32_t data_rs2;
         bus32_t result;
     } exe_to_mem_t;
+
+    typedef struct packed {
+        instr_data_t instr;
+        bus32_t result;
+    } mem_to_wb_t;
 
 endpackage

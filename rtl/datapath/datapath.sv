@@ -34,9 +34,9 @@ module datapath
         .rstn_i(rstn_i),
         .addr_rs1_i(decode_to_exe.instr.addr_rs1),
         .addr_rs2_i(decode_to_exe.instr.addr_rs2),
-        .addr_rd_i('0),
-        .data_rd_i('0),
-        .write_enable_i('1),
+        .addr_rd_i(mem_to_wb.instr.addr_rd),
+        .data_rd_i(mem_to_wb.result),
+        .write_enable_i(mem_to_wb.instr.write_enable),
         .data_rs1_o(decode_to_exe.data_rs1),
         .data_rs2_o(decode_to_exe.data_rs2)
     );
@@ -49,5 +49,18 @@ module datapath
         .exe_to_mem_o(exe_to_mem)
     );
 
+    // Mem
+    mem_to_wb_t mem_to_wb;
+
+    mem mem_inst (
+        .clk_i(clk_i),
+        .rstn_i(rstn_i),
+        .exe_to_mem_i(exe_to_mem),
+        .mem_to_wb_o(mem_to_wb)
+    );
+
+
+    // Writeback
+    
    
 endmodule

@@ -19,4 +19,5 @@ module exe
     );
 
     assign exe_to_mem_o.instr = decode_to_exe_i.instr;
+    assign exe_to_mem_o.data_rs2 = decode_to_exe_i.data_rs2;
 endmodule

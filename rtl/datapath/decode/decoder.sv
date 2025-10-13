@@ -21,6 +21,7 @@ module decoder
                 instr_decoded_o.write_enable = 1'b1;
                 instr_decoded_o.rs1_or_pc = RS1;
                 instr_decoded_o.rs2_or_imm = IMM;
+                instr_decoded_o.alu_or_mem = ALU;
 
                 case (instr_i.rtype.func3)
                     F3_ADDI: begin
@@ -37,6 +38,7 @@ module decoder
                         instr_decoded_o.addr_rs2 = '0;
                         instr_decoded_o.addr_rd = '0;
                         instr_decoded_o.alu_op = ADD;
+                        instr_decoded_o.alu_or_mem = ALU;
                     end
                 endcase
             end
@@ -45,6 +47,7 @@ module decoder
                 instr_decoded_o.write_enable = 1'b1;
                 instr_decoded_o.rs1_or_pc = RS1;
                 instr_decoded_o.rs2_or_imm = RS2;
+                instr_decoded_o.alu_or_mem = ALU;
 
                 case (instr_i.rtype.func3)
                     F3_ADDI: begin
@@ -70,6 +73,7 @@ module decoder
                 instr_decoded_o.rs1_or_pc = RS1;
                 instr_decoded_o.rs2_or_imm = IMM;
                 instr_decoded_o.alu_op = ADD;
+                instr_decoded_o.alu_or_mem = ALU;
 
                 instr_decoded_o.addr_rs1 = '0; // Hardcoded to r0 which is hardwired to 0
             end

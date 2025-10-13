@@ -13,7 +13,7 @@ BUILD_DIR  ?= obj_dir
 SIM_MAIN   ?= simulator/sim_main.cpp
 
 CXXFLAGS  ?= -std=c++17 -O2
-VERILATOR_FLAGS ?= --cc --exe --trace -Wall -Wno-UNUSED -MMD --assert
+VERILATOR_FLAGS ?= --cc --exe --trace-fst --trace-structs --trace-depth 99 -Wall -Wno-UNUSED -MMD --assert
 # Añade includes si hace falta, por ejemplo: CPPFLAGS += -I../rtl/include
 
 # --- lectura de filelist: ignora comentarios y líneas vacías ---

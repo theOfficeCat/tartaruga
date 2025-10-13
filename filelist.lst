@@ -9,3 +9,6 @@ rtl/datapath/fetch/dummy_imem.sv
 rtl/datapath/decode/decoder.sv
 rtl/datapath/decode/regfile.sv
 rtl/datapath/decode/immediate.sv
+
+rtl/datapath/exe/exe.sv
+rtl/datapath/exe/alu.sv

@@ -15,13 +15,18 @@ module datapath
         .instr_o(instruction)
     );
 
+    // Decode
     decode_to_exe_t decode_to_exe;
 
-    // Decode
     decoder decoder_inst (
         .pc_i(pc),
         .instr_i(instruction),
         .instr_decoded_o(decode_to_exe.instr)
+    );
+
+    immediate immediate_inst (
+        .instr_i(decode_to_exe.instr),
+        .imm_o(decode_to_exe.immediate)
     );
 
     regfile regfile_inst (
@@ -36,4 +41,13 @@ module datapath
         .data_rs2_o(decode_to_exe.data_rs2)
     );
 
+    // Exe
+    exe_to_mem_t exe_to_mem;
+    
+    exe exe_inst (
+        .decode_to_exe_i(decode_to_exe),
+        .exe_to_mem_o(exe_to_mem)
+    );
+
+   
 endmodule

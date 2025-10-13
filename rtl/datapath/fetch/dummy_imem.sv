@@ -11,11 +11,16 @@ module dummy_imem
     bus32_t [IMEM_POS-1:0] dummy_instr_mem_q;
 
     always_ff @(posedge clk_i, negedge rstn_i) begin
-        for (int i = 0; i < IMEM_POS; ++i) begin
-            if (~rstn_i) begin
-                dummy_instr_mem_q[i] <= i;
+        if (~rstn_i) begin
+            dummy_instr_mem_q[0] <= 32'h000010B7;
+            dummy_instr_mem_q[1] <= 32'h00002137;
+            dummy_instr_mem_q[2] <= 32'h000031B7;
+            dummy_instr_mem_q[3] <= 32'h00004237;
+            for (int i = 4; i < IMEM_POS; ++i) begin
+                dummy_instr_mem_q[i] <= '0;
             end
-            else begin
+        end else begin
+            for (int i = 0; i < IMEM_POS; ++i) begin
                 dummy_instr_mem_q[i] <= dummy_instr_mem_d[i];
             end
         end

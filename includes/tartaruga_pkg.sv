@@ -35,6 +35,11 @@ package tartaruga_pkg;
         PC
     } rs1_or_pc_t;
 
+    typedef enum logic {
+        ALU,
+        MEM
+    } alu_or_mem_t;
+
     typedef struct packed {
         logic [31:25] func7;
         logic [24:20] rs2;
@@ -69,12 +74,20 @@ package tartaruga_pkg;
         rs1_or_pc_t rs1_or_pc;
         rs2_or_imm_t rs2_or_imm;
         alu_op_t alu_op;
+
+        alu_or_mem_t alu_or_mem;
     } instr_data_t;
 
     typedef struct packed {
         instr_data_t instr;
         bus32_t data_rs1;
         bus32_t data_rs2;
+        bus32_t immediate;
     } decode_to_exe_t;
+
+    typedef struct packed {
+        instr_data_t instr;
+        bus32_t result;
+    } exe_to_mem_t;
 
 endpackage

@@ -12,15 +12,25 @@ module dummy_imem
 
     always_ff @(posedge clk_i, negedge rstn_i) begin
         if (~rstn_i) begin
-            //dummy_instr_mem_q[0] <= 32'h000F50B7;
-            //dummy_instr_mem_q[1] <= 32'h00002117;
-            dummy_instr_mem_q[0] <= 32'h456790b7;
-            dummy_instr_mem_q[1] <= 32'h90108093;
-            dummy_instr_mem_q[2] <= 32'hFFF08193;
-            dummy_instr_mem_q[3] <= 32'h00004237;
-            for (int i = 4; i < IMEM_POS; ++i) begin
+            for (int i = 0; i < IMEM_POS; ++i) begin
                 dummy_instr_mem_q[i] <= '0;
             end
+            //dummy_instr_mem_q[0] <= 32'h000F50B7;
+            //dummy_instr_mem_q[1] <= 32'h00002117;
+            dummy_instr_mem_q[0] <= 32'h123450b7;
+            dummy_instr_mem_q[1] <= 32'h67808093;
+            dummy_instr_mem_q[2] <= 32'h87654137;
+            dummy_instr_mem_q[3] <= 32'h32110113;
+            dummy_instr_mem_q[4] <= 32'h002081b3;
+            dummy_instr_mem_q[5] <= 32'h401101b3;
+            dummy_instr_mem_q[6] <= 32'h001121b3;
+            dummy_instr_mem_q[7] <= 32'h001131b3;
+            dummy_instr_mem_q[8] <= 32'h001111b3;
+            dummy_instr_mem_q[9] <= 32'h001151b3;
+            dummy_instr_mem_q[10] <= 32'h401151b3;
+            dummy_instr_mem_q[11] <= 32'h001141b3;
+            dummy_instr_mem_q[12] <= 32'h001161b3;
+            dummy_instr_mem_q[13] <= 32'h001171b3;
         end else begin
             for (int i = 0; i < IMEM_POS; ++i) begin
                 dummy_instr_mem_q[i] <= dummy_instr_mem_d[i];

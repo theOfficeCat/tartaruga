@@ -20,9 +20,17 @@ package tartaruga_pkg;
     // STRUCTURES
     ///////////////////////////////////////////////////////////////////////////////
 
-    typedef enum logic [2:0] {
+    typedef enum logic [3:0] {
         ADD,
-        SUB
+        SUB,
+        SLT,
+        SLTU,
+        SLL,
+        SRL,
+        SRA,
+        XOR,
+        OR,
+        AND
     } alu_op_t;
 
     typedef enum logic {

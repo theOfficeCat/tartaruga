@@ -9,7 +9,7 @@ module immediate
     always_comb begin
         case (instr_i.instr.rtype.opcode)
             OP_LUI, OP_AUIPC: begin
-                imm_o = {{12{instr_i.instr.utype.imm[31]}}, instr_i.instr.utype.imm};
+                imm_o = {instr_i.instr.utype.imm, 12'b0};
             end
             OP_ALU_I: begin
                 imm_o = {{20{instr_i.instr.itype.imm[31]}}, instr_i.instr.itype.imm};

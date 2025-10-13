@@ -12,8 +12,10 @@ module dummy_imem
 
     always_ff @(posedge clk_i, negedge rstn_i) begin
         if (~rstn_i) begin
-            dummy_instr_mem_q[0] <= 32'h000F50B7;
-            dummy_instr_mem_q[1] <= 32'h00002117;
+            //dummy_instr_mem_q[0] <= 32'h000F50B7;
+            //dummy_instr_mem_q[1] <= 32'h00002117;
+            dummy_instr_mem_q[0] <= 32'h456790b7;
+            dummy_instr_mem_q[1] <= 32'h90108093;
             dummy_instr_mem_q[2] <= 32'hFFF08193;
             dummy_instr_mem_q[3] <= 32'h00004237;
             for (int i = 4; i < IMEM_POS; ++i) begin

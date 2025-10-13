@@ -12,7 +12,7 @@ module fetch
 
     always_ff @(posedge clk_i, negedge rstn_i) begin
         if (~rstn_i) begin
-            pc_q <= '0;
+            pc_q <= 32'h80000000; // this makes easier to check AUIPC
         end
         else begin
             pc_q <= pc_d;

@@ -31,6 +31,13 @@ module dummy_imem
             dummy_instr_mem_q[11] <= 32'h001141b3;
             dummy_instr_mem_q[12] <= 32'h001161b3;
             dummy_instr_mem_q[13] <= 32'h001171b3;
+            dummy_instr_mem_q[14] <= 32'h10000213;
+            dummy_instr_mem_q[15] <= 32'h02322023;
+            dummy_instr_mem_q[16] <= 32'h00000033;
+            dummy_instr_mem_q[17] <= 32'h00000033;
+            dummy_instr_mem_q[18] <= 32'h00000033;
+            dummy_instr_mem_q[19] <= 32'h00000033;
+            dummy_instr_mem_q[20] <= 32'h02022283;
         end else begin
             for (int i = 0; i < IMEM_POS; ++i) begin
                 dummy_instr_mem_q[i] <= dummy_instr_mem_d[i];

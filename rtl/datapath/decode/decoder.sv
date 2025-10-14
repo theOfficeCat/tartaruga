@@ -323,6 +323,23 @@ module decoder
                 instr_decoded_o.alu_or_mem = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
             end
+
+            OP_LW: begin
+                instr_decoded_o.write_enable = 1'b1;
+                instr_decoded_o.rs1_or_pc = RS1;
+                instr_decoded_o.rs2_or_imm = IMM;
+                instr_decoded_o.alu_op = ADD;
+                instr_decoded_o.alu_or_mem = MEM; // Not really needed because not write enable on regfile
+                instr_decoded_o.store_to_mem = 1'b0;
+            end
+            OP_SW: begin
+                instr_decoded_o.write_enable = 1'b0;
+                instr_decoded_o.rs1_or_pc = RS1;
+                instr_decoded_o.rs2_or_imm = IMM;
+                instr_decoded_o.alu_op = ADD;
+                instr_decoded_o.alu_or_mem = ALU; // Not really needed because not write enable on regfile
+                instr_decoded_o.store_to_mem = 1'b1;
+            end
             default: begin
                 // illegal instruction treated as NOP being a x0 + x0
                 // without write

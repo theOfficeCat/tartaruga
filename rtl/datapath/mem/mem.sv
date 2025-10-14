@@ -13,8 +13,8 @@ module mem
     dummy_dmem dummy_dmem_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
-        .addr_i(exe_to_mem_i.data_rs2),
-        .data_wr_i(exe_to_mem_i.result),
+        .addr_i(exe_to_mem_i.result),
+        .data_wr_i(exe_to_mem_i.data_rs2),
         .we_mem_i(exe_to_mem_i.instr.store_to_mem),
         .data_rd_o(result_mem)
     );

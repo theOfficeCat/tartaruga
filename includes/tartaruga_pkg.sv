@@ -71,11 +71,22 @@ package tartaruga_pkg;
         logic [6:0]   opcode;
     } itype_t;
 
+    typedef struct packed {
+        logic [31:25] imm5;
+        logic [24:20] rs2;
+        logic [19:15] rs1;
+        logic [14:12] func3;
+        logic [11:7]  imm0;
+        logic [6:0]  opcode;
+    } stype_t;
+
+
     typedef union packed {
         logic [31:0] instruction;
         rtype_t rtype;
         utype_t utype;
         itype_t itype;
+        stype_t stype;
         // Add types of instructions as structs of 32 bits to ease the decode
     } instruction_t;
 

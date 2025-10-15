@@ -11,6 +11,8 @@ module datapath
     fetch fetch_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
+        .taken_branch_i(mem_to_wb.branch_taken),
+        .new_pc_i(mem_to_wb.result),
         .pc_o(pc),
         .instr_o(instruction)
     );

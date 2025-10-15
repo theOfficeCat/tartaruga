@@ -49,6 +49,7 @@ package tartaruga_pkg;
     } alu_or_mem_t;
 
     typedef enum logic [2:0] {
+        JUMP,
         BNE,
         BEQ,
         BLT,
@@ -56,7 +57,7 @@ package tartaruga_pkg;
         BGE,
         BGEU,
         BNONE
-    } branch_kind_t;
+    } jump_kind_t;
 
     typedef struct packed {
         logic [31:25] func7;
@@ -90,6 +91,16 @@ package tartaruga_pkg;
         logic [6:0]  opcode;
     } stype_t;
 
+    typedef struct packed {
+        logic [31:31] imm12;
+        logic [30:25] imm5;
+        logic [24:20] rs2;
+        logic [19:15] rs1;
+        logic [14:12] func3;
+        logic [11:8]  imm1;
+        logic [7:7]   imm11;
+        logic [6:0]   opcode;
+    } btype_t;
 
     typedef union packed {
         logic [31:0] instruction;
@@ -97,6 +108,7 @@ package tartaruga_pkg;
         utype_t utype;
         itype_t itype;
         stype_t stype;
+        btype_t btype;
         // Add types of instructions as structs of 32 bits to ease the decode
     } instruction_t;
 
@@ -116,7 +128,7 @@ package tartaruga_pkg;
         alu_or_mem_t alu_or_mem;
         logic store_to_mem;
 
-        branch_kind_t branch_kind;
+        jump_kind_t jump_kind;
     } instr_data_t;
 
     typedef struct packed {

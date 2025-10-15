@@ -18,3 +18,12 @@ add x0, x0, x0
 add x0, x0, x0
 add x0, x0, x0
 lw x5, 0x20(x4)
+
+li x6, 0
+li x7, 4
+
+test_loop:
+addi x6, x6, 1
+bne x6, x7, test_loop
+
+addi x8, x7, -1

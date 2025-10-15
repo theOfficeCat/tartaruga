@@ -23,6 +23,7 @@ module decoder
                 instr_decoded_o.rs2_or_imm = IMM;
                 instr_decoded_o.alu_or_mem = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
+                instr_decoded_o.jump_kind = BNONE;
 
                 case (instr_i.rtype.func3)
                     F3_ADD_SUB: begin //ADDI
@@ -111,6 +112,7 @@ module decoder
                 instr_decoded_o.rs2_or_imm = RS2;
                 instr_decoded_o.alu_or_mem = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
+                instr_decoded_o.jump_kind = BNONE;
 
                 case (instr_i.rtype.func3)
                     F3_ADD_SUB: begin
@@ -311,6 +313,7 @@ module decoder
                 instr_decoded_o.alu_op = ADD;
                 instr_decoded_o.alu_or_mem = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
+                instr_decoded_o.jump_kind = BNONE;
 
                 instr_decoded_o.addr_rs1 = '0; // Hardcoded to x0 which is hardwired to 0
             end
@@ -322,6 +325,7 @@ module decoder
                 instr_decoded_o.alu_op = ADD;
                 instr_decoded_o.alu_or_mem = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
+                instr_decoded_o.jump_kind = BNONE;
             end
 
             OP_LW: begin
@@ -329,8 +333,9 @@ module decoder
                 instr_decoded_o.rs1_or_pc = RS1;
                 instr_decoded_o.rs2_or_imm = IMM;
                 instr_decoded_o.alu_op = ADD;
-                instr_decoded_o.alu_or_mem = MEM; // Not really needed because not write enable on regfile
+                instr_decoded_o.alu_or_mem = MEM;
                 instr_decoded_o.store_to_mem = 1'b0;
+                instr_decoded_o.jump_kind = BNONE;
             end
             OP_SW: begin
                 instr_decoded_o.write_enable = 1'b0;
@@ -339,6 +344,40 @@ module decoder
                 instr_decoded_o.alu_op = ADD;
                 instr_decoded_o.alu_or_mem = ALU; // Not really needed because not write enable on regfile
                 instr_decoded_o.store_to_mem = 1'b1;
+                instr_decoded_o.jump_kind = BNONE;
+            end
+            OP_BRANCH: begin
+                instr_decoded_o.write_enable = 1'b1;
+                instr_decoded_o.rs1_or_pc = PC;
+                instr_decoded_o.rs2_or_imm = IMM;
+                instr_decoded_o.alu_op = ADD;
+                instr_decoded_o.alu_or_mem = ALU; // Not really needed because not write enable on regfile
+                instr_decoded_o.store_to_mem = 1'b0;
+                instr_decoded_o.jump_kind = BNONE;
+
+                case (instr_i.btype.func3)
+                    F3_BEQ: begin
+                        instr_decoded_o.jump_kind = BEQ;
+                    end
+                    F3_BNE: begin
+                        instr_decoded_o.jump_kind = BNE;
+                    end
+                    F3_BLT: begin
+                        instr_decoded_o.jump_kind = BLT;
+                    end
+                    F3_BLTU: begin
+                        instr_decoded_o.jump_kind = BLTU;
+                    end
+                    F3_BGE: begin
+                        instr_decoded_o.jump_kind = BGE;
+                    end
+                    F3_BGEU: begin
+                        instr_decoded_o.jump_kind = BGEU;
+                    end
+                    default: begin
+                        instr_decoded_o.jump_kind = BNONE;
+                    end
+                endcase
             end
             default: begin
                 // illegal instruction treated as NOP being a x0 + x0
@@ -353,6 +392,7 @@ module decoder
                 instr_decoded_o.alu_op = ADD;
                 instr_decoded_o.alu_or_mem = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
+                instr_decoded_o.jump_kind = BNONE;
             end
         endcase
     end

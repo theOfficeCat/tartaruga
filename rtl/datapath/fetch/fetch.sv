@@ -3,6 +3,8 @@ module fetch
 (
     input logic clk_i,
     input logic rstn_i,
+    input logic taken_branch_i,
+    input bus32_t new_pc_i,
     output bus32_t pc_o,
     output instruction_t instr_o
 );
@@ -19,7 +21,7 @@ module fetch
         end
     end
 
-    assign pc_d = pc_q + 4;
+    assign pc_d = (taken_branch_i == 1'b1) ? new_pc_i : pc_q + 4;
 
     assign pc_o = pc_q;
 

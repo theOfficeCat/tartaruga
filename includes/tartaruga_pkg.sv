@@ -48,6 +48,16 @@ package tartaruga_pkg;
         MEM
     } alu_or_mem_t;
 
+    typedef enum logic [2:0] {
+        BNE,
+        BEQ,
+        BLT,
+        BLTU,
+        BGE,
+        BGEU,
+        BNONE
+    } branch_kind_t;
+
     typedef struct packed {
         logic [31:25] func7;
         logic [24:20] rs2;
@@ -105,6 +115,8 @@ package tartaruga_pkg;
 
         alu_or_mem_t alu_or_mem;
         logic store_to_mem;
+
+        branch_kind_t branch_kind;
     } instr_data_t;
 
     typedef struct packed {
@@ -118,11 +130,15 @@ package tartaruga_pkg;
         instr_data_t instr;
         bus32_t data_rs2;
         bus32_t result;
+
+        logic branch_taken;
     } exe_to_mem_t;
 
     typedef struct packed {
         instr_data_t instr;
         bus32_t result;
+
+        logic branch_taken;
     } mem_to_wb_t;
 
 endpackage

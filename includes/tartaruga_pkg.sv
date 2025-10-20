@@ -43,10 +43,11 @@ package tartaruga_pkg;
         PC
     } rs1_or_pc_t;
 
-    typedef enum logic {
+    typedef enum logic [1:0] {
         ALU,
-        MEM
-    } alu_or_mem_t;
+        MEM,
+        PC_4
+    } wb_origin_t;
 
     typedef enum logic [2:0] {
         JUMP,
@@ -102,6 +103,15 @@ package tartaruga_pkg;
         logic [6:0]   opcode;
     } btype_t;
 
+    typedef struct packed {
+        logic [31:31] imm20;
+        logic [30:21] imm1;
+        logic [20:20] imm11;
+        logic [19:12] imm12;
+        logic [11:7]  rd;
+        logic [6:0]   opcode;
+    } jtype_t;
+
     typedef union packed {
         logic [31:0] instruction;
         rtype_t rtype;
@@ -109,6 +119,7 @@ package tartaruga_pkg;
         itype_t itype;
         stype_t stype;
         btype_t btype;
+        jtype_t jtype;
         // Add types of instructions as structs of 32 bits to ease the decode
     } instruction_t;
 
@@ -125,7 +136,7 @@ package tartaruga_pkg;
         rs2_or_imm_t rs2_or_imm;
         alu_op_t alu_op;
 
-        alu_or_mem_t alu_or_mem;
+        wb_origin_t wb_origin;
         logic store_to_mem;
 
         jump_kind_t jump_kind;
@@ -151,6 +162,7 @@ package tartaruga_pkg;
         bus32_t result;
 
         logic branch_taken;
+        bus32_t branched_pc;
     } mem_to_wb_t;
 
 endpackage

@@ -20,6 +20,9 @@ module immediate
             OP_BRANCH: begin
                 imm_o = {{20{instr_i.instr.btype.imm11[7]}}, instr_i.instr.btype.imm11, instr_i.instr.btype.imm5, instr_i.instr.btype.imm1, 1'b0};
             end
+            OP_JAL: begin
+                imm_o = {{11{instr_i[31]}}, instr_i.instr.jtype.imm20, instr_i.instr.jtype.imm12, instr_i.instr.jtype.imm11, instr_i.instr.jtype.imm1, 1'b0};
+            end
             default: begin
                 imm_o = '0;
             end

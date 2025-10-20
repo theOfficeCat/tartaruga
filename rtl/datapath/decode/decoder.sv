@@ -21,7 +21,7 @@ module decoder
                 instr_decoded_o.write_enable = 1'b1;
                 instr_decoded_o.rs1_or_pc = RS1;
                 instr_decoded_o.rs2_or_imm = IMM;
-                instr_decoded_o.alu_or_mem = ALU;
+                instr_decoded_o.wb_origin = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
                 instr_decoded_o.jump_kind = BNONE;
 
@@ -60,7 +60,7 @@ module decoder
                                 instr_decoded_o.addr_rs2 = '0;
                                 instr_decoded_o.addr_rd = '0;
                                 instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.alu_or_mem = ALU;
+                                instr_decoded_o.wb_origin = ALU;
                                 instr_decoded_o.store_to_mem = 1'b0;
                             end
                         endcase
@@ -84,7 +84,7 @@ module decoder
                                 instr_decoded_o.addr_rs2 = '0;
                                 instr_decoded_o.addr_rd = '0;
                                 instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.alu_or_mem = ALU;
+                                instr_decoded_o.wb_origin = ALU;
                                 instr_decoded_o.store_to_mem = 1'b0;
                             end
                         endcase
@@ -100,7 +100,7 @@ module decoder
                         instr_decoded_o.addr_rs2 = '0;
                         instr_decoded_o.addr_rd = '0;
                         instr_decoded_o.alu_op = ADD;
-                        instr_decoded_o.alu_or_mem = ALU;
+                        instr_decoded_o.wb_origin = ALU;
                         instr_decoded_o.store_to_mem = 1'b0;
                     end
                 endcase
@@ -110,7 +110,7 @@ module decoder
                 instr_decoded_o.write_enable = 1'b1;
                 instr_decoded_o.rs1_or_pc = RS1;
                 instr_decoded_o.rs2_or_imm = RS2;
-                instr_decoded_o.alu_or_mem = ALU;
+                instr_decoded_o.wb_origin = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
                 instr_decoded_o.jump_kind = BNONE;
 
@@ -134,7 +134,7 @@ module decoder
                                 instr_decoded_o.addr_rs2 = '0;
                                 instr_decoded_o.addr_rd = '0;
                                 instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.alu_or_mem = ALU;
+                                instr_decoded_o.wb_origin = ALU;
                                 instr_decoded_o.store_to_mem = 1'b0;
                             end
                         endcase
@@ -155,7 +155,7 @@ module decoder
                                 instr_decoded_o.addr_rs2 = '0;
                                 instr_decoded_o.addr_rd = '0;
                                 instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.alu_or_mem = ALU;
+                                instr_decoded_o.wb_origin = ALU;
                                 instr_decoded_o.store_to_mem = 1'b0;
                             end
                         endcase
@@ -176,7 +176,7 @@ module decoder
                                 instr_decoded_o.addr_rs2 = '0;
                                 instr_decoded_o.addr_rd = '0;
                                 instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.alu_or_mem = ALU;
+                                instr_decoded_o.wb_origin = ALU;
                                 instr_decoded_o.store_to_mem = 1'b0;
                             end
                         endcase
@@ -197,7 +197,7 @@ module decoder
                                 instr_decoded_o.addr_rs2 = '0;
                                 instr_decoded_o.addr_rd = '0;
                                 instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.alu_or_mem = ALU;
+                                instr_decoded_o.wb_origin = ALU;
                                 instr_decoded_o.store_to_mem = 1'b0;
                             end
                         endcase
@@ -218,7 +218,7 @@ module decoder
                                 instr_decoded_o.addr_rs2 = '0;
                                 instr_decoded_o.addr_rd = '0;
                                 instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.alu_or_mem = ALU;
+                                instr_decoded_o.wb_origin = ALU;
                                 instr_decoded_o.store_to_mem = 1'b0;
                             end
                         endcase
@@ -242,7 +242,7 @@ module decoder
                                 instr_decoded_o.addr_rs2 = '0;
                                 instr_decoded_o.addr_rd = '0;
                                 instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.alu_or_mem = ALU;
+                                instr_decoded_o.wb_origin = ALU;
                                 instr_decoded_o.store_to_mem = 1'b0;
                             end
                         endcase
@@ -263,7 +263,7 @@ module decoder
                                 instr_decoded_o.addr_rs2 = '0;
                                 instr_decoded_o.addr_rd = '0;
                                 instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.alu_or_mem = ALU;
+                                instr_decoded_o.wb_origin = ALU;
                                 instr_decoded_o.store_to_mem = 1'b0;
                             end
                         endcase
@@ -284,7 +284,7 @@ module decoder
                                 instr_decoded_o.addr_rs2 = '0;
                                 instr_decoded_o.addr_rd = '0;
                                 instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.alu_or_mem = ALU;
+                                instr_decoded_o.wb_origin = ALU;
                                 instr_decoded_o.store_to_mem = 1'b0;
                             end
                         endcase
@@ -311,7 +311,7 @@ module decoder
                 instr_decoded_o.rs1_or_pc = RS1;
                 instr_decoded_o.rs2_or_imm = IMM;
                 instr_decoded_o.alu_op = ADD;
-                instr_decoded_o.alu_or_mem = ALU;
+                instr_decoded_o.wb_origin = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
                 instr_decoded_o.jump_kind = BNONE;
 
@@ -323,7 +323,7 @@ module decoder
                 instr_decoded_o.rs1_or_pc = PC;
                 instr_decoded_o.rs2_or_imm = IMM;
                 instr_decoded_o.alu_op = ADD;
-                instr_decoded_o.alu_or_mem = ALU;
+                instr_decoded_o.wb_origin = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
                 instr_decoded_o.jump_kind = BNONE;
             end
@@ -333,7 +333,7 @@ module decoder
                 instr_decoded_o.rs1_or_pc = RS1;
                 instr_decoded_o.rs2_or_imm = IMM;
                 instr_decoded_o.alu_op = ADD;
-                instr_decoded_o.alu_or_mem = MEM;
+                instr_decoded_o.wb_origin = MEM;
                 instr_decoded_o.store_to_mem = 1'b0;
                 instr_decoded_o.jump_kind = BNONE;
             end
@@ -342,7 +342,7 @@ module decoder
                 instr_decoded_o.rs1_or_pc = RS1;
                 instr_decoded_o.rs2_or_imm = IMM;
                 instr_decoded_o.alu_op = ADD;
-                instr_decoded_o.alu_or_mem = ALU; // Not really needed because not write enable on regfile
+                instr_decoded_o.wb_origin = ALU; // Not really needed because not write enable on regfile
                 instr_decoded_o.store_to_mem = 1'b1;
                 instr_decoded_o.jump_kind = BNONE;
             end
@@ -351,7 +351,7 @@ module decoder
                 instr_decoded_o.rs1_or_pc = PC;
                 instr_decoded_o.rs2_or_imm = IMM;
                 instr_decoded_o.alu_op = ADD;
-                instr_decoded_o.alu_or_mem = ALU; // Not really needed because not write enable on regfile
+                instr_decoded_o.wb_origin = ALU; // Not really needed because not write enable on regfile
                 instr_decoded_o.store_to_mem = 1'b0;
                 instr_decoded_o.jump_kind = BNONE;
 
@@ -379,6 +379,16 @@ module decoder
                     end
                 endcase
             end
+            OP_JAL: begin
+                instr_decoded_o.write_enable = 1'b1;
+                instr_decoded_o.rs1_or_pc = PC;
+                instr_decoded_o.rs2_or_imm = IMM;
+                instr_decoded_o.alu_op = ADD;
+                instr_decoded_o.wb_origin = PC_4;
+                instr_decoded_o.store_to_mem = 1'b0;
+                instr_decoded_o.jump_kind = JUMP;
+
+            end
             default: begin
                 // illegal instruction treated as NOP being a x0 + x0
                 // without write
@@ -390,7 +400,7 @@ module decoder
                 instr_decoded_o.addr_rs2 = '0;
                 instr_decoded_o.addr_rd = '0;
                 instr_decoded_o.alu_op = ADD;
-                instr_decoded_o.alu_or_mem = ALU;
+                instr_decoded_o.wb_origin = ALU;
                 instr_decoded_o.store_to_mem = 1'b0;
                 instr_decoded_o.jump_kind = BNONE;
             end

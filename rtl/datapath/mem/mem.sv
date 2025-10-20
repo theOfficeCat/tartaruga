@@ -20,7 +20,26 @@ module mem
     );
 
     assign mem_to_wb_o.instr = exe_to_mem_i.instr;
-    assign mem_to_wb_o.result = (exe_to_mem_i.instr.alu_or_mem == ALU) ? exe_to_mem_i.result : result_mem;
+    //assign mem_to_wb_o.result = (exe_to_mem_i.instr.wb_origin == ALU) ? exe_to_mem_i.result : result_mem;
     assign mem_to_wb_o.branch_taken = exe_to_mem_i.branch_taken;
+
+    assign mem_to_wb_o.branched_pc = (exe_to_mem_i.branch_taken == 1'b1) ? exe_to_mem_i.result : '0;
+
+    always_comb begin
+        case (exe_to_mem_i.instr.wb_origin)
+            ALU: begin
+                mem_to_wb_o.result = exe_to_mem_i.result;
+            end
+            MEM: begin
+                mem_to_wb_o.result = result_mem;
+            end
+            PC_4: begin
+                mem_to_wb_o.result = exe_to_mem_i.instr.pc + 4;
+            end
+            default: begin
+                mem_to_wb_o = '0;
+            end
+        endcase
+    end
 
 endmodule

@@ -12,7 +12,7 @@ module datapath
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .taken_branch_i(mem_to_wb.branch_taken),
-        .new_pc_i(mem_to_wb.result),
+        .new_pc_i(mem_to_wb.branched_pc),
         .pc_o(pc),
         .instr_o(instruction)
     );

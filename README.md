@@ -17,20 +17,31 @@ Subset muy subsetero de RV32I
 
 Salto a posicion de memoria 3090 (0xC12). Por ahora sera una NOP
 
+## Ejecutar cosas
+
+### Compilar el core
+
+```
+make all
+```
+
+
+### Ejecutar binarios
+
+```
+riscv64-unknown-elf-as -march=rv32i test.s
+
+(en el directorio base)
+
+python3 prepare_program.py (elf generado)
+
+./run_tartaruga.sh (fichero).program # el generado por el script de python
+```
+
 ## Cosas pendientes de hacer
-
-### RTL
-
-- Creacion de inmediatos
-- ALU
-- Logica de control de entradas a la ALU
-- Acabar el decoder
-- Interfz de memoria de datos
-- Writeback
 
 ### Simulator
 
-- Poder cargar binarios
 - Generar dumps de texto
 
 ### Verificacion

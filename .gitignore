@@ -3,4 +3,4 @@ obj_dir/
 *.fst
 *.ron
 tests/*.out
-
+*.program

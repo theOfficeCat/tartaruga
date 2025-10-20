@@ -1,3 +1,6 @@
+import "DPI-C" function int read_mem(input int pc);
+
+
 module dummy_imem 
     import tartaruga_pkg::*;
 (
@@ -6,7 +9,7 @@ module dummy_imem
     input bus32_t pc_i,
     output bus32_t instr_o
 );
-
+/*
     bus32_t [IMEM_POS-1:0] dummy_instr_mem_d;
     bus32_t [IMEM_POS-1:0] dummy_instr_mem_q;
 
@@ -60,5 +63,8 @@ module dummy_imem
             dummy_instr_mem_d[i] = dummy_instr_mem_q[i];
         end
     end
-
+*/
+    always_ff @(posedge clk_i) begin
+        instr_o <= read_mem((pc_i >> 2) & 32'hFFF);
+    end
 endmodule

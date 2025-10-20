@@ -10,7 +10,7 @@ VERILATOR ?= verilator
 TOP        ?= top    # nombre del top-level module (sin prefijos)
 FILELIST   ?= filelist.lst
 BUILD_DIR  ?= obj_dir
-SIM_MAIN   ?= simulator/sim_main.cpp
+SIM_MAIN   ?= simulator/sim_main.cpp simulator/i_mem.cpp
 
 CXXFLAGS  ?= -std=c++17 -O2
 VERILATOR_FLAGS ?= --cc --exe --trace-fst --trace-structs --trace-depth 99 -Wall -Wno-UNUSED -MMD --assert
@@ -28,7 +28,7 @@ EXEC := $(BUILD_DIR)/V$(TOP)
 all: $(EXEC)
 
 # Regla principal: correr Verilator y compilar con el Makefile que genera
-$(EXEC): $(FILELIST) $(SIM_MAIN)
+$(EXEC): $(FILELIST) $(SIM_MAIN) 
 	@echo "=== Verilating: top=$(TOP), build_dir=$(BUILD_DIR) ==="
 	@mkdir -p $(BUILD_DIR)
 	$(VERILATOR) $(VERILATOR_FLAGS) -Mdir $(BUILD_DIR) --top-module $(TOP) $(SRCS) --exe $(SIM_MAIN) --build

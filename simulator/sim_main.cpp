@@ -1,36 +1,3 @@
-/*#include "Vtop.h"            // Verilator genera este header (V + nombre del top)
-#include "verilated.h"       // Librería base de Verilator
-#include "verilated_vcd_c.h" // Para traza VCD (si usas --trace)
-
-#include <iostream>
-#include <cstdlib>  // for getenv
-#include <string>
-
-// Tiempo simulado (en ticks)
-vluint64_t main_time = 0;
-
-// Función obligatoria para Verilator (retorna tiempo actual)
-double sc_time_stamp() { return main_time; }
-
-int main(int argc, char **argv) {
-    Verilated::commandArgs(argc, argv); // procesa args estándar
-
-    Verilated::traceEverOn(true); // antes de instanciar el top o de cualquier eval()
-    // Instancia del diseño top
-    Vtop *top = new Vtop;
-
-    // Control de traza
-    VerilatedVcdC* tfp = nullptr;
-    bool gen_trace = false;
-    const char* env_trace = std::getenv("GEN_TRACE"); // ejemplo: GEN_TRACE=1 make run
-    if (env_trace && std::string(env_trace) == "1") {
-        Verilated::traceEverOn(true);
-        tfp = new VerilatedVcdC;
-        top->trace(tfp, 99);   // nivel de profundidad
-        tfp->open("trace.vcd");
-        gen_trace = true;
-        std::cout << "[sim] VCD tracing enabled (trace.vcd)\n";
-    }*/
 #include "Vtop.h"
 #include "verilated.h"
 #include "verilated_fst_c.h"
@@ -38,11 +5,23 @@ int main(int argc, char **argv) {
 #include <cstdlib>
 #include <string>
 
+extern "C" bool load_data(const char* path);
+
 vluint64_t main_time = 0;
 double sc_time_stamp() { return main_time; }
 
 int main(int argc, char **argv) {
     Verilated::commandArgs(argc, argv);
+
+    if (argc < 2) {
+        std::cerr << "No program to execute" << std::endl;
+        return 1;
+    }
+
+    std::cerr << argv[1] << std::endl;
+
+    load_data(argv[1]);
+
     Verilated::traceEverOn(true); // activa trazas globales antes del eval
 
     Vtop *top = new Vtop;

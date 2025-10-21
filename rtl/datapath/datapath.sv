@@ -1,3 +1,9 @@
+import "DPI-C" function void print_commit(
+    input int pc,
+    input int instr,
+    input int result
+);
+
 module datapath
     import tartaruga_pkg::*;
 (
@@ -61,8 +67,14 @@ module datapath
         .mem_to_wb_o(mem_to_wb)
     );
 
-
     // Writeback
-    
-   
+
+    always_ff @(posedge clk_i) begin
+        print_commit(
+            mem_to_wb.instr.pc,
+            mem_to_wb.instr.instr.instruction,
+            mem_to_wb.result
+        );
+    end
+
 endmodule

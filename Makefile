@@ -62,7 +62,7 @@ show-files:
 
 clean:
 	@echo "Cleaning $(BUILD_DIR) and Verilator-generated files..."
-	-@rm -rf $(BUILD_DIR) obj_dir *.vcd *.dat *.log *.wdb csrc
+	-@rm -rf $(BUILD_DIR) obj_dir *.vcd *.dat *.log *.wdb csrc **/*.out **/*.program **/*.commit
 	-@find . -name "*~" -delete
 	@echo "Clean done."
 

@@ -4,3 +4,4 @@ obj_dir/
 *.ron
 tests/*.out
 *.program
+*.commit

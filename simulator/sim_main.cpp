@@ -6,6 +6,8 @@
 #include <string>
 
 extern "C" bool load_data(const char* path);
+extern "C" void init_commit(std::string path);
+extern "C" void close_commit();
 
 vluint64_t main_time = 0;
 double sc_time_stamp() { return main_time; }
@@ -21,6 +23,7 @@ int main(int argc, char **argv) {
     std::cerr << argv[1] << std::endl;
 
     load_data(argv[1]);
+    init_commit(std::string(argv[1]) + std::string(".commit"));
 
     Verilated::traceEverOn(true); // activa trazas globales antes del eval
 
@@ -79,6 +82,8 @@ int main(int argc, char **argv) {
     }
     top->final();
     delete top;
+
+    close_commit();
 
     return 0;
 }

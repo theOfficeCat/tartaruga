@@ -2,20 +2,50 @@
 
 Subset muy subsetero de RV32I
 
-## Instrucciones minimas
+## Instrucciones soportadas
 
-- ADD ```rd <- ra + rb```
-- LW ```rd <- dmem[rb + offset]```
-- SW ```dmem[rb + offset] <- ra```
-- BEQ ```pc <- pc + offset``` if taken
-- BGT ```pc <- pc + offset``` if taken
-- BGE ```pc <- pc + offset``` if taken
-- JMP ```pc <- pc + offset``` sera simplemente un ```JAL``` a ```x0```
-- LI ```rd <- sign_ext(imm)```
+### Aritmetico-logicas
+
+- ADD
+- SUB
+- SLL
+- SRL
+- SRA
+- AND
+- OR
+- XOR
+- SLT
+- SLTU
+- ADDI
+- SLLI
+- SRLI
+- SRAI
+- ANDI
+- ORI
+- XORI
+- SLTI
+- SLTIU
+- AUIPC
+- LUI
+
+### Flow control
+
+- JAL
+- BEQ
+- BNE
+- BLT
+- BGE
+- BLTU
+- BGEU
+
+### Memory
+
+- LW
+- SW
 
 ## Tratamiento de instruccion ilegal
 
-Salto a posicion de memoria 3090 (0xC12). Por ahora sera una NOP
+Por ahora sera una NOP
 
 ## Ejecutar cosas
 
@@ -29,11 +59,7 @@ make all
 ### Ejecutar binarios
 
 ```
-riscv64-unknown-elf-as -march=rv32i test.s
-
-(en el directorio base)
-
-python3 prepare_program.py (elf generado)
+python3 prepare_program.py test.S
 
 ./run_tartaruga.sh (fichero).program # el generado por el script de python
 ```
@@ -42,7 +68,7 @@ python3 prepare_program.py (elf generado)
 
 ### Simulator
 
-- Generar dumps de texto
+- Generar dumps de texto con el desensamblado de las instrucciones
 
 ### Verificacion
 
@@ -51,7 +77,9 @@ python3 prepare_program.py (elf generado)
 
 ## Assembler
 
-[https://riscvasm.lucasteske.dev/#](https://riscvasm.lucasteske.dev/#)
+```
+riscv64-unknown-elf-as -march=rv32i
+```
 
 ## Instructions information
 

@@ -376,6 +376,9 @@ module decoder
                     end
                     default: begin
                         instr_decoded_o.jump_kind = BNONE;
+                        // As there is not write permission on the register
+                        // file nor memory by forcing to not take the branch
+                        // we can also have a NOP behavior
                     end
                 endcase
             end

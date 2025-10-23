@@ -347,7 +347,7 @@ module decoder
                 instr_decoded_o.jump_kind = BNONE;
             end
             OP_BRANCH: begin
-                instr_decoded_o.write_enable = 1'b1;
+                instr_decoded_o.write_enable = 1'b0;
                 instr_decoded_o.rs1_or_pc = PC;
                 instr_decoded_o.rs2_or_imm = IMM;
                 instr_decoded_o.alu_op = ADD;

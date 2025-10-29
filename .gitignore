@@ -6,3 +6,4 @@ tests/*.out
 *.program
 *.commit
 *.elf
+assembled_tests/*

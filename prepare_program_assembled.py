@@ -3,14 +3,14 @@ import sys
 import os
 import subprocess
 
-if len(sys.argv) != 2:
-    print(f"Uso: {sys.argv[0]} <fichero_asm_riscv.S>")
+if len(sys.argv) != 3:
+    print(f"Uso: {sys.argv[0]} <fichero_asm_riscv.S> <directorio de destino>")
     sys.exit(1)
 
 input_file = sys.argv[1]
 base_name = os.path.splitext(os.path.basename(input_file))[0]
 elf_file = input_file
-output_file = f"{base_name}.program"
+output_file = f"{sys.argv[2]}/{base_name}.program"
 
 # Expresión regular para capturar la instrucción en hexadecimal
 hex_pattern = re.compile(r'^\s*[0-9a-f]+:\s*([0-9a-f]{8})', re.IGNORECASE)

@@ -54,8 +54,9 @@ int main(int argc, char **argv) {
     top->rstn_i = 1; // libera reset
 
     // Bucle principal de simulación
-    const uint64_t max_cycles = 10000; // límite de seguridad
-    for (uint64_t cycle = 0; cycle < max_cycles && !Verilated::gotFinish(); ++cycle) {
+    //const uint64_t max_cycles = 10000; // límite de seguridad
+    //for (uint64_t cycle = 0; cycle < max_cycles && !Verilated::gotFinish(); ++cycle) {
+    while (!Verilated::gotFinish()) {
         // clock negativo
         top->clk_i = 0;
         top->eval();

@@ -3,6 +3,7 @@ module dummy_dmem
 (
     input logic clk_i,
     input logic rstn_i,
+    input bus32_t pc_i,
     input bus32_t addr_i,
     input bus32_t data_wr_i,
     input logic we_mem_i,
@@ -22,9 +23,24 @@ module dummy_dmem
                 dummy_data_mem_q[i] <= dummy_data_mem_d[i];
             end
         end
+
+        if (addr_i == 32'h40000000 && we_mem_i == 1'b1) begin
+            if (data_wr_i == 32'h1) begin
+                $display("Execution suceeded at PC 0x%h\n", pc_i);
+            end
+            else if (data_wr_i == 32'h2) begin
+                $display("Execution failed at PC 0x%h\n", pc_i);
+            end
+            else begin
+                $display("Error at PC 0x%h\n", pc_i);
+            end
+
+            $finish(); // When writing to this position of memory we end the execution
+        end
     end
 
     bus32_t addr_effective;
+
 
     assign addr_effective = (addr_i >> 2) & 32'hFFF;
 

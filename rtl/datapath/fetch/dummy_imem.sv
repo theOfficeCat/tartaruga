@@ -9,6 +9,14 @@ module dummy_imem
     input bus32_t pc_i,
     output bus32_t instr_o
 );
+    bus32_t [IMEM_POS-1:0] imem;
+
+    initial begin
+        for (int i = 0; i < IMEM_POS; ++i) begin
+            imem[i] = read_mem(i);
+        end
+    end
+
 /*
     bus32_t [IMEM_POS-1:0] dummy_instr_mem_d;
     bus32_t [IMEM_POS-1:0] dummy_instr_mem_q;
@@ -64,7 +72,5 @@ module dummy_imem
         end
     end
 */
-    always_ff @(posedge clk_i) begin
-        instr_o <= read_mem((pc_i >> 2) & 32'hFFF);
-    end
+    assign instr_o = imem[(pc_i >> 2) & 32'hFFF];
 endmodule

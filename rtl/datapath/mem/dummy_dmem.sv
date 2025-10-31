@@ -26,7 +26,7 @@ module dummy_dmem
 
         if (addr_i == 32'h40000000 && we_mem_i == 1'b1) begin
             if (data_wr_i == 32'h1) begin
-                $display("Execution suceeded at PC 0x%h\n", pc_i);
+                $display("Execution succeeded at PC 0x%h\n", pc_i);
             end
             else if (data_wr_i == 32'h2) begin
                 $display("Execution failed at PC 0x%h\n", pc_i);

@@ -64,6 +64,17 @@ python3 prepare_program.py test.S
 ./run_tartaruga.sh (fichero).program # el generado por el script de python
 ```
 
+### Ejecutar ISA tests
+
+```
+cd riscv-tests
+autoconf
+./configure --prefix=$RISCV/target
+make isa
+cd ..
+./run_isa_tests.sh
+```
+
 ## Cosas pendientes de hacer
 
 ### Simulator

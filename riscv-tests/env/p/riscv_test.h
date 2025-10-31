@@ -111,12 +111,14 @@
     
 
 #define RVTEST_PASS                                                     \
-    la x1, 0x40000000;                                                  \
+    addi x1, x0, 1;                                                     \
+    slli x1, x1, 30;							\
     li x2, 1;                                                           \
     sw x2, 0(x1);
 
 #define RVTEST_FAIL                                                     \
-    la x1, 0x40000000;                                                  \
+    addi x1, x0, 1;                                                     \
+    slli x1, x1, 30;							\
     li x2, 2;                                                           \
     sw x2, 0(x1);
 

@@ -14,6 +14,22 @@ jobs:
       image: archlinux:latest
 
     steps:
+      - name: Cache pacman packages
+        uses: actions/cache@v3
+        with:
+          path: /var/cache/pacman/pkg
+          key: pacman-packages-${{ hashFiles('**/scripts/**') }}
+          restore-keys: |
+            pacman-packages-
+
+      - name: Cache yay build
+        uses: actions/cache@v3
+        with:
+          path: /home/builduser/.cache/yay
+          key: yay-cache-${{ hashFiles('**/scripts/**') }}
+          restore-keys: |
+            yay-cache-
+
       - name: Install dependencies and AUR helper
         run: |
           echo "🔧 Updating system and installing base packages..."
@@ -43,6 +59,9 @@ jobs:
 
           riscv64-unknown-elf-gcc --version
           whereis riscv64-unknown-elf-gcc
+
+      - name: Show directory structure
+        run: ls -R
 
       - name: Build Tartaruga
         run: |

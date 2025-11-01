@@ -65,11 +65,6 @@ jobs:
 
           whereis riscv64-unknown-elf-gcc
 
-      - name: Show repository files
-        run: |
-          echo "📂 Listing repository files:"
-          ls -R $GITHUB_WORKSPACE
-
       - name: Build Tartaruga
         run: |
           echo "🏗️ Building Tartaruga with Verilator..."

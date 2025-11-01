@@ -11,7 +11,8 @@ jobs:
   riscv-ci:
     runs-on: ubuntu-latest
     container:
-      image: archlinux:latest
+      # Cambia esta línea por tu contenedor ya creado
+      image: ghcr.io/theofficecat/docker-tartaruga:latest
 
     steps:
       - name: Checkout repository
@@ -35,34 +36,16 @@ jobs:
           restore-keys: |
             yay-cache-
 
-      - name: Install dependencies and AUR helper
+      - name: Show directory structure
         run: |
-          echo "🔧 Updating system and installing base packages..."
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm base-devel git wget autoconf automake libtool make python verilator
-
-          # Crear usuario normal para makepkg
-          useradd -m builduser
-          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-          # Instalar yay como builduser en su home
-          sudo -u builduser bash -c "
-            cd /home/builduser
-            git clone https://aur.archlinux.org/yay.git
-            cd yay
-            makepkg -si --noconfirm
-          "
-
-          verilator --version
+          echo "📂 Listing repository files:"
+          ls -R $GITHUB_WORKSPACE
 
       - name: Install RISC-V GCC toolchain (AUR)
         run: |
-          sudo -u builduser bash -c "
-            cd /github/workspace
-            yay -S --noconfirm riscv64-unknown-elf-toolchain-bin
-          "
+          # Si tu contenedor ya lo tiene, esta parte se puede saltar
+          yay -S --noconfirm riscv64-unknown-elf-toolchain-bin
           riscv64-unknown-elf-gcc --version
-
           whereis riscv64-unknown-elf-gcc
 
       - name: Build Tartaruga
@@ -86,4 +69,3 @@ jobs:
           cd $GITHUB_WORKSPACE
           chmod +x run_isa_tests.sh run_tartaruga.sh
           ./run_isa_tests.sh
-

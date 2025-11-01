@@ -42,13 +42,6 @@ jobs:
           echo "📂 Listing repository files:"
           ls -R $GITHUB_WORKSPACE
 
-      - name: Install RISC-V GCC toolchain (AUR)
-        run: |
-          # Si tu contenedor ya lo tiene, esta parte se puede saltar
-          yay -S --noconfirm riscv64-unknown-elf-toolchain-bin
-          riscv64-unknown-elf-gcc --version
-          whereis riscv64-unknown-elf-gcc
-
       - name: Build Tartaruga
         run: |
           echo "🏗️ Building Tartaruga with Verilator..."

@@ -18,6 +18,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Cache pacman packages
+        if: always()
         uses: actions/cache@v3
         with:
           path: /var/cache/pacman/pkg
@@ -26,6 +27,7 @@ jobs:
             pacman-packages-
 
       - name: Cache yay build
+        if: always()
         uses: actions/cache@v3
         with:
           path: /home/builduser/.cache/yay
@@ -60,14 +62,13 @@ jobs:
             yay -S --noconfirm riscv64-unknown-elf-toolchain-bin
           "
           riscv64-unknown-elf-gcc --version
+
           whereis riscv64-unknown-elf-gcc
 
-      - name: Show directory structure
+      - name: Show repository files
         run: |
           echo "📂 Listing repository files:"
-          ls -R /github/workspace
-          echo "📂 Listing builduser home directory:"
-          ls -R /home/builduser
+          ls -R $GITHUB_WORKSPACE
 
       - name: Build Tartaruga
         run: |

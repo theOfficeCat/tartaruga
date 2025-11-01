@@ -37,11 +37,6 @@ jobs:
           restore-keys: |
             yay-cache-
 
-      - name: Show directory structure
-        run: |
-          echo "📂 Listing repository files:"
-          ls -R $GITHUB_WORKSPACE
-
       - name: Build Tartaruga
         run: |
           echo "🏗️ Building Tartaruga with Verilator..."

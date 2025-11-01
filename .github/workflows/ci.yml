@@ -13,6 +13,7 @@ jobs:
     container:
       # Cambia esta línea por tu contenedor ya creado
       image: ghcr.io/theofficecat/docker-tartaruga:latest
+      options: "--user root"
 
     steps:
       - name: Checkout repository

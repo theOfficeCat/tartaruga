@@ -14,28 +14,35 @@ jobs:
       image: archlinux:latest
 
     steps:
-      - name: Install dependencies
+      - name: Install dependencies and AUR helper
         run: |
-          echo "🔧 Updating Arch and installing dependencies..."
+          echo "🔧 Updating system and installing base packages..."
           pacman -Syu --noconfirm
-          pacman -S --noconfirm \
-            base-devel \
-            git \
-            autoconf \
-            automake \
-            libtool \
-            make \
-            python \
-            verilator \
-            riscv64-unknown-elf-gcc \
-            riscv64-unknown-elf-binutils \
-            riscv64-unknown-elf-newlib
+          pacman -S --noconfirm base-devel git wget autoconf automake libtool make python verilator
+
+          # Crear usuario normal (makepkg no debe ejecutarse como root)
+          useradd -m builduser
+          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+          # Instalar yay (AUR helper)
+          sudo -u builduser bash -c "
+            cd /home/builduser
+            git clone https://aur.archlinux.org/yay.git
+            cd yay
+            makepkg -si --noconfirm
+          "
 
           verilator --version
+
+      - name: Install RISC-V GCC toolchain (AUR)
+        run: |
+          sudo -u builduser bash -c "
+            yay -S --noconfirm riscv64-unknown-elf-toolchain-bin
+          "
+          riscv64-unknown-elf-gcc --version
+
           riscv64-unknown-elf-gcc --version
           whereis riscv64-unknown-elf-gcc
-
-
 
       - name: Build Tartaruga
         run: |

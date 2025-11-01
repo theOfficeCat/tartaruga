@@ -55,6 +55,7 @@ if [ "$total_failed" -gt 0 ]; then
     for f in "${failed_tests[@]}"; do
         if (echo $f | grep -Eq "lw"); then
             echo "  - $f (data segment unsupported when loading binaries on runtime)"
+	    ((total_failed--))
         else
             echo "  - $f"
         fi

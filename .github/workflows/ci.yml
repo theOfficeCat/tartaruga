@@ -47,7 +47,7 @@ jobs:
       - name: Build Tartaruga
         run: |
           echo "🏗️ Building Tartaruga with Verilator..."
-          make all
+          make clean && make all
 
       - name: Build ISA tests
         run: |

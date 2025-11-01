@@ -14,6 +14,9 @@ jobs:
       image: archlinux:latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Cache pacman packages
         uses: actions/cache@v3
         with:
@@ -36,11 +39,11 @@ jobs:
           pacman -Syu --noconfirm
           pacman -S --noconfirm base-devel git wget autoconf automake libtool make python verilator
 
-          # Crear usuario normal (makepkg no debe ejecutarse como root)
+          # Crear usuario normal para makepkg
           useradd -m builduser
           echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-          # Instalar yay (AUR helper)
+          # Instalar yay como builduser en su home
           sudo -u builduser bash -c "
             cd /home/builduser
             git clone https://aur.archlinux.org/yay.git
@@ -53,25 +56,29 @@ jobs:
       - name: Install RISC-V GCC toolchain (AUR)
         run: |
           sudo -u builduser bash -c "
+            cd /github/workspace
             yay -S --noconfirm riscv64-unknown-elf-toolchain-bin
           "
-          riscv64-unknown-elf-gcc --version
-
           riscv64-unknown-elf-gcc --version
           whereis riscv64-unknown-elf-gcc
 
       - name: Show directory structure
-        run: ls -R
+        run: |
+          echo "📂 Listing repository files:"
+          ls -R /github/workspace
+          echo "📂 Listing builduser home directory:"
+          ls -R /home/builduser
 
       - name: Build Tartaruga
         run: |
           echo "🏗️ Building Tartaruga with Verilator..."
+          cd /github/workspace
           make clean && make all
 
       - name: Build ISA tests
         run: |
           echo "🧩 Building RISC-V ISA tests..."
-          cd riscv-tests
+          cd /github/workspace/riscv-tests
           autoconf
           export RISCV=/opt/riscv64-unknown-elf-toolchain/
           ./configure --prefix=$RISCV/target
@@ -80,9 +87,7 @@ jobs:
       - name: Run ISA tests
         run: |
           echo "🚀 Running ISA tests..."
-          chmod +x run_isa_tests.sh
-          chmod +x run_tartaruga.sh
+          cd /github/workspace
+          chmod +x run_isa_tests.sh run_tartaruga.sh
           ./run_isa_tests.sh
-
-
 

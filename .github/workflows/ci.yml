@@ -73,13 +73,13 @@ jobs:
       - name: Build Tartaruga
         run: |
           echo "🏗️ Building Tartaruga with Verilator..."
-          cd /github/workspace
+          cd $GITHUB_WORKSPACE
           make clean && make all
 
       - name: Build ISA tests
         run: |
           echo "🧩 Building RISC-V ISA tests..."
-          cd /github/workspace/riscv-tests
+          cd $GITHUB_WORKSPACE/riscv-tests
           autoconf
           export RISCV=/opt/riscv64-unknown-elf-toolchain/
           ./configure --prefix=$RISCV/target
@@ -88,7 +88,7 @@ jobs:
       - name: Run ISA tests
         run: |
           echo "🚀 Running ISA tests..."
-          cd /github/workspace
+          cd $GITHUB_WORKSPACE
           chmod +x run_isa_tests.sh run_tartaruga.sh
           ./run_isa_tests.sh
 

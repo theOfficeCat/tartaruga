@@ -61,3 +61,5 @@ if [ "$total_failed" -gt 0 ]; then
     done
 fi
 echo "==============================="
+
+exit $total_failed

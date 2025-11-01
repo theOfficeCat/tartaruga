@@ -1,0 +1,62 @@
+name: Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  riscv-ci:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          echo "🔧 Updating Arch and installing dependencies..."
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm \
+            base-devel \
+            git \
+            autoconf \
+            automake \
+            libtool \
+            make \
+            python \
+            verilator \
+            riscv64-unknown-elf-gcc \
+            riscv64-unknown-elf-binutils \
+            riscv64-unknown-elf-newlib
+
+          verilator --version
+          riscv64-unknown-elf-gcc --version
+          whereis riscv64-unknown-elf-gcc
+
+
+
+      - name: Build Tartaruga
+        run: |
+          echo "🏗️ Building Tartaruga with Verilator..."
+          make all
+
+      - name: Build ISA tests
+        run: |
+          echo "🧩 Building RISC-V ISA tests..."
+          cd riscv-tests
+          autoconf
+          export RISCV=/opt/riscv64-unknown-elf-toolchain/
+          ./configure --prefix=$RISCV/target
+          make isa
+
+      - name: Run ISA tests
+        run: |
+          echo "🚀 Running ISA tests..."
+          chmod +x run_isa_tests.sh
+          chmod +x run_tartaruga.sh
+          ./run_isa_tests.sh
+
+
+

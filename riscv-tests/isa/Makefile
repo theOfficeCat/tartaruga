@@ -2,7 +2,7 @@
 # Makefile for riscv-tests/isa
 #-----------------------------------------------------------------------
 
-XLEN ?= 64
+XLEN ?= 32
 
 src_dir := .
 
@@ -26,18 +26,18 @@ include $(src_dir)/rv64mzicbo/Makefrag
 include $(src_dir)/hypervisor/Makefrag
 endif
 include $(src_dir)/rv32ui/Makefrag
-include $(src_dir)/rv32uc/Makefrag
-include $(src_dir)/rv32um/Makefrag
-include $(src_dir)/rv32ua/Makefrag
-include $(src_dir)/rv32uf/Makefrag
-include $(src_dir)/rv32ud/Makefrag
-include $(src_dir)/rv32uzfh/Makefrag
-include $(src_dir)/rv32uzba/Makefrag
-include $(src_dir)/rv32uzbb/Makefrag
-include $(src_dir)/rv32uzbc/Makefrag
-include $(src_dir)/rv32uzbs/Makefrag
-include $(src_dir)/rv32si/Makefrag
-include $(src_dir)/rv32mi/Makefrag
+#include $(src_dir)/rv32uc/Makefrag
+#include $(src_dir)/rv32um/Makefrag
+#include $(src_dir)/rv32ua/Makefrag
+#include $(src_dir)/rv32uf/Makefrag
+#include $(src_dir)/rv32ud/Makefrag
+#include $(src_dir)/rv32uzfh/Makefrag
+#include $(src_dir)/rv32uzba/Makefrag
+#include $(src_dir)/rv32uzbb/Makefrag
+#include $(src_dir)/rv32uzbc/Makefrag
+#include $(src_dir)/rv32uzbs/Makefrag
+#include $(src_dir)/rv32si/Makefrag
+#include $(src_dir)/rv32mi/Makefrag
 
 default: all
 

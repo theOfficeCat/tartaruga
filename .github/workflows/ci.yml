@@ -19,24 +19,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Cache pacman packages
-        if: always()
-        uses: actions/cache@v3
-        with:
-          path: /var/cache/pacman/pkg
-          key: pacman-packages-${{ hashFiles('**/scripts/**') }}
-          restore-keys: |
-            pacman-packages-
-
-      - name: Cache yay build
-        if: always()
-        uses: actions/cache@v3
-        with:
-          path: /home/builduser/.cache/yay
-          key: yay-cache-${{ hashFiles('**/scripts/**') }}
-          restore-keys: |
-            yay-cache-
-
       - name: Build Tartaruga
         run: |
           echo "🏗️ Building Tartaruga with Verilator..."

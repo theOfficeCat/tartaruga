@@ -144,6 +144,7 @@ package tartaruga_pkg;
 
     typedef struct packed {
         instr_data_t instr;
+        logic valid;
         bus32_t data_rs1;
         bus32_t data_rs2;
         bus32_t immediate;
@@ -151,6 +152,7 @@ package tartaruga_pkg;
 
     typedef struct packed {
         instr_data_t instr;
+        logic valid;
         bus32_t data_rs2;
         bus32_t result;
 
@@ -159,6 +161,7 @@ package tartaruga_pkg;
 
     typedef struct packed {
         instr_data_t instr;
+        logic valid;
         bus32_t result;
 
         logic branch_taken;

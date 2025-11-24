@@ -10,70 +10,195 @@ module datapath
     input logic clk_i,
     input logic rstn_i
 );
-    instruction_t instruction;
-    bus32_t pc;
+    function automatic logic reg_hazard(
+        input logic [4:0] rs,
+        input logic [4:0] rd,
+        input logic write_en
+    );
+        return (write_en && (rd != 5'd0) && (rd == rs));
+    endfunction
+
+
+    instruction_t instruction_d, instruction_q;
+    bus32_t pc_fetch, pc_decode;
     
     // Fetch
     fetch fetch_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
-        .taken_branch_i(mem_to_wb.branch_taken),
-        .new_pc_i(mem_to_wb.branched_pc),
-        .pc_o(pc),
-        .instr_o(instruction)
+        .taken_branch_i(mem_to_wb_q.branch_taken),
+        .new_pc_i(mem_to_wb_q.branched_pc),
+        .stall_i(stall),
+        .pc_o(pc_fetch),
+        .instr_o(instruction_d)
     );
+/*
+    always_ff @(negedge rstn_i, posedge clk_i) begin
+        if (~rstn_i) begin
+            instruction_q <= '0;
+            pc_decode <= '0;
+        end else begin
+            instruction_q <= instruction_d;
+            pc_decode <= pc_fetch;
+        end
+    end
+*/
+    always_ff @(negedge rstn_i, posedge clk_i) begin
+        if (~rstn_i) begin
+            instruction_q <= '0;
+            pc_decode <= '0;
+        end else begin
+            if (!stall) begin
+                instruction_q <= instruction_d; // captura nueva instrucción
+                pc_decode <= pc_fetch;
+            end else begin
+                instruction_q <= instruction_q; // hold
+                pc_decode <= pc_decode;         // hold
+            end
+        end
+    end
 
     // Decode
-    decode_to_exe_t decode_to_exe;
+    decode_to_exe_t decode_to_exe_d, decode_to_exe_q;
 
     decoder decoder_inst (
-        .pc_i(pc),
-        .instr_i(instruction),
-        .instr_decoded_o(decode_to_exe.instr)
+        .pc_i(pc_decode),
+        .instr_i(instruction_q),
+        .instr_decoded_o(decode_to_exe_d.instr)
     );
 
     immediate immediate_inst (
-        .instr_i(decode_to_exe.instr),
-        .imm_o(decode_to_exe.immediate)
+        .instr_i(decode_to_exe_d.instr),
+        .imm_o(decode_to_exe_d.immediate)
     );
 
     regfile regfile_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
-        .addr_rs1_i(decode_to_exe.instr.addr_rs1),
-        .addr_rs2_i(decode_to_exe.instr.addr_rs2),
-        .addr_rd_i(mem_to_wb.instr.addr_rd),
-        .data_rd_i(mem_to_wb.result),
-        .write_enable_i(mem_to_wb.instr.write_enable),
-        .data_rs1_o(decode_to_exe.data_rs1),
-        .data_rs2_o(decode_to_exe.data_rs2)
+        .addr_rs1_i(decode_to_exe_d.instr.addr_rs1),
+        .addr_rs2_i(decode_to_exe_d.instr.addr_rs2),
+        .addr_rd_i(mem_to_wb_q.instr.addr_rd),
+        .data_rd_i(mem_to_wb_q.result),
+        .write_enable_i(mem_to_wb_q.instr.write_enable),
+        .data_rs1_o(decode_to_exe_d.data_rs1),
+        .data_rs2_o(decode_to_exe_d.data_rs2)
     );
+
+    logic stall;
+
+    reg_addr_t rs1_d, rs2_d;
+    assign rs1_d = decode_to_exe_d.instr.addr_rs1;
+    assign rs2_d = decode_to_exe_d.instr.addr_rs2;
+
+    logic hazard_rs1, hazard_rs2;
+
+    always_comb begin
+        hazard_rs1 = 1'b0;
+        hazard_rs2 = 1'b0;
+
+        // EXE stage (instruction currently in EXE pipeline register)
+        hazard_rs1 |= reg_hazard(rs1_d, decode_to_exe_q.instr.addr_rd, decode_to_exe_q.instr.write_enable);
+        hazard_rs2 |= reg_hazard(rs2_d, decode_to_exe_q.instr.addr_rd, decode_to_exe_q.instr.write_enable);
+
+        // EXE->MEM stage
+        hazard_rs1 |= reg_hazard(rs1_d, exe_to_mem_q.instr.addr_rd, exe_to_mem_q.instr.write_enable);
+        hazard_rs2 |= reg_hazard(rs2_d, exe_to_mem_q.instr.addr_rd, exe_to_mem_q.instr.write_enable);
+
+        // MEM->WB stage
+        hazard_rs1 |= reg_hazard(rs1_d, mem_to_wb_q.instr.addr_rd, mem_to_wb_q.instr.write_enable);
+        hazard_rs2 |= reg_hazard(rs2_d, mem_to_wb_q.instr.addr_rd, mem_to_wb_q.instr.write_enable);
+
+        stall = hazard_rs1 || hazard_rs2;
+    end
+/*
+    always_ff @(negedge rstn_i, posedge clk_i) begin
+        if (~rstn_i) begin
+            decode_to_exe_q <= '0;
+        end else begin
+            decode_to_exe_q <= decode_to_exe_d;
+        end
+    end
+*/
+
+    decode_to_exe_t nop_instr;
+    
+    always_comb begin
+        nop_instr.instr.pc = '0;
+        nop_instr.instr.instr = '0;
+        nop_instr.instr.addr_rs1 = '0;
+        nop_instr.instr.addr_rs2 = '0;
+        nop_instr.instr.addr_rd = '0;
+        nop_instr.instr.write_enable = '0;
+        nop_instr.instr.rs1_or_pc = RS1;
+        nop_instr.instr.rs2_or_imm = RS2;
+        nop_instr.instr.alu_op = ADD;
+        nop_instr.instr.wb_origin = ALU;
+        nop_instr.instr.store_to_mem = '0;
+        nop_instr.instr.jump_kind = BNONE;
+
+        nop_instr.valid = '0;
+        nop_instr.data_rs1 = '0;
+        nop_instr.data_rs2 = '0;
+        nop_instr.immediate = '0;
+    end
+
+    assign decode_to_exe_d.valid = ~stall;
+
+    always_ff @(negedge rstn_i, posedge clk_i) begin
+        if (~rstn_i) begin
+            decode_to_exe_q <= '0;
+        end else begin
+            if (!stall) begin
+                decode_to_exe_q <= decode_to_exe_d;
+            end else begin
+                decode_to_exe_q <= nop_instr;
+            end
+        end
+    end
 
     // Exe
-    exe_to_mem_t exe_to_mem;
+    exe_to_mem_t exe_to_mem_d, exe_to_mem_q;
     
     exe exe_inst (
-        .decode_to_exe_i(decode_to_exe),
-        .exe_to_mem_o(exe_to_mem)
+        .decode_to_exe_i(decode_to_exe_q),
+        .exe_to_mem_o(exe_to_mem_d)
     );
 
+    always_ff @(negedge rstn_i, posedge clk_i) begin
+        if (~rstn_i) begin
+            exe_to_mem_q <= '0;
+        end else begin
+            exe_to_mem_q <= exe_to_mem_d;
+        end
+    end
+
+ 
     // Mem
-    mem_to_wb_t mem_to_wb;
+    mem_to_wb_t mem_to_wb_d, mem_to_wb_q;
 
     mem mem_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
-        .exe_to_mem_i(exe_to_mem),
-        .mem_to_wb_o(mem_to_wb)
+        .exe_to_mem_i(exe_to_mem_q),
+        .mem_to_wb_o(mem_to_wb_d)
     );
 
+    always_ff @(negedge rstn_i, posedge clk_i) begin
+        if (~rstn_i) begin
+            mem_to_wb_q <= '0;
+        end else begin
+            mem_to_wb_q <= mem_to_wb_d;
+        end
+    end
+
+ 
     // Writeback
 
     always_ff @(posedge clk_i) begin
         print_commit(
-            mem_to_wb.instr.pc,
-            mem_to_wb.instr.instr.instruction,
-            mem_to_wb.result
+            mem_to_wb_q.instr.pc,
+            mem_to_wb_q.instr.instr.instruction,
+            mem_to_wb_q.result
         );
     end
 

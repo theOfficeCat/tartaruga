@@ -21,6 +21,7 @@ module mem
     );
 
     assign mem_to_wb_o.instr = exe_to_mem_i.instr;
+    assign mem_to_wb_o.valid = exe_to_mem_i.valid;
     //assign mem_to_wb_o.result = (exe_to_mem_i.instr.wb_origin == ALU) ? exe_to_mem_i.result : result_mem;
     assign mem_to_wb_o.branch_taken = exe_to_mem_i.branch_taken;
 

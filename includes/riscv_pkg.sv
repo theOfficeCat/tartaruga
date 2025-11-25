@@ -40,4 +40,6 @@ package riscv_pkg;
     //} f3_alu_i_t;
     //
     // We can reuse the one for the ALU without immediate
+
+    logic [31:0] NOP_INSTR = 32'h00000033;
 endpackage

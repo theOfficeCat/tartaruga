@@ -17,7 +17,7 @@ module fetch
         if (~rstn_i) begin
             pc_q <= 32'h80000000; // this makes easier to check AUIPC
         end
-        else if (~stall_i) begin
+        else if (~stall_i || taken_branch_i) begin
             pc_q <= pc_d;
         end
     end

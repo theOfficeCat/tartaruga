@@ -10,6 +10,13 @@ module decoder
     //assign instr_decoded_o = '0;
 
     always_comb begin
+        instr_decoded_o.pc = pc_i;
+        instr_decoded_o.instr = instr_i;
+        //instr_decoded_o.addr_rs1 = (instr_decoded_o.rs1_or_pc == RS1) ? instr_i.rtype.rs1 : '0;
+        //instr_decoded_o.addr_rs2 = (instr_decoded_o.rs2_or_imm == RS2) ? instr_i.rtype.rs2 : '0;
+        instr_decoded_o.addr_rs1 = instr_i.rtype.rs1;
+        instr_decoded_o.addr_rs2 = instr_i.rtype.rs2;
+        instr_decoded_o.addr_rd = instr_i.rtype.rd;
        
         case (instr_i.rtype.opcode)
             OP_ALU_I: begin
@@ -403,12 +410,16 @@ module decoder
                 instr_decoded_o.jump_kind = BNONE;
             end
         endcase
-        instr_decoded_o.pc = pc_i;
-        instr_decoded_o.instr = instr_i;
-        instr_decoded_o.addr_rs1 = (instr_decoded_o.rs1_or_pc == RS1) ? instr_i.rtype.rs1 : '0;
-        instr_decoded_o.addr_rs2 = (instr_decoded_o.rs2_or_imm == RS2) ? instr_i.rtype.rs2 : '0;
-        instr_decoded_o.addr_rd = instr_i.rtype.rd;
- 
+
+        // hardwire source registers to x0 if there is no reading from there
+        // to avoid problems with hazard detection
+        if ((instr_decoded_o.rs1_or_pc == PC && instr_decoded_o.jump_kind == BNONE) || instr_i.rtype.opcode == OP_JAL) begin
+            instr_decoded_o.addr_rs1 = '0;
+        end
+
+        if ((instr_decoded_o.rs2_or_imm == IMM && instr_decoded_o.jump_kind == BNONE && instr_decoded_o.store_to_mem == 1'b0) || instr_i.rtype.opcode == OP_JAL) begin
+            instr_decoded_o.addr_rs2 = '0;
+        end
     end
 
 endmodule

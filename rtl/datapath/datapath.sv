@@ -6,6 +6,7 @@ import "DPI-C" function void print_commit(
 
 module datapath
     import tartaruga_pkg::*;
+    import riscv_pkg::*;
 (
     input logic clk_i,
     input logic rstn_i
@@ -46,6 +47,11 @@ module datapath
     always_ff @(negedge rstn_i, posedge clk_i) begin
         if (~rstn_i) begin
             instruction_q <= '0;
+            pc_decode <= '0;
+        end else if (exe_to_mem_d.branch_taken == 1'b1 ||
+                     mem_to_wb_d.branch_taken == 1'b1 ||
+                     mem_to_wb_q.branch_taken == 1'b1) begin
+            instruction_q <= NOP_INSTR;
             pc_decode <= '0;
         end else begin
             if (!stall) begin
@@ -110,15 +116,6 @@ module datapath
 
         stall = hazard_rs1 || hazard_rs2;
     end
-/*
-    always_ff @(negedge rstn_i, posedge clk_i) begin
-        if (~rstn_i) begin
-            decode_to_exe_q <= '0;
-        end else begin
-            decode_to_exe_q <= decode_to_exe_d;
-        end
-    end
-*/
 
     decode_to_exe_t nop_instr;
     
@@ -149,7 +146,11 @@ module datapath
             decode_to_exe_q <= '0;
         end else begin
             if (!stall) begin
-                decode_to_exe_q <= decode_to_exe_d;
+                if (exe_to_mem_d.branch_taken == 1'b1) begin
+                    decode_to_exe_q <= nop_instr;
+                end else begin
+                    decode_to_exe_q <= decode_to_exe_d;
+                end
             end else begin
                 decode_to_exe_q <= nop_instr;
             end

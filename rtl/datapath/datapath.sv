@@ -22,6 +22,7 @@ module datapath
 
     instruction_t instruction_d, instruction_q;
     bus32_t pc_fetch, pc_decode;
+    logic valid_decode;
     
     // Fetch
     fetch fetch_inst (
@@ -53,13 +54,16 @@ module datapath
                      mem_to_wb_q.branch_taken == 1'b1) begin
             instruction_q <= NOP_INSTR;
             pc_decode <= '0;
+            valid_decode <= 1'b0;
         end else begin
             if (!stall) begin
                 instruction_q <= instruction_d; // captura nueva instrucción
                 pc_decode <= pc_fetch;
+                valid_decode <= 1'b1;
             end else begin
                 instruction_q <= instruction_q; // hold
                 pc_decode <= pc_decode;         // hold
+                valid_decode <= 1'b1;
             end
         end
     end
@@ -121,7 +125,7 @@ module datapath
     
     always_comb begin
         nop_instr.instr.pc = '0;
-        nop_instr.instr.instr = '0;
+        nop_instr.instr.instr = 32'h00000033;
         nop_instr.instr.addr_rs1 = '0;
         nop_instr.instr.addr_rs2 = '0;
         nop_instr.instr.addr_rd = '0;
@@ -139,7 +143,7 @@ module datapath
         nop_instr.immediate = '0;
     end
 
-    assign decode_to_exe_d.valid = ~stall;
+    assign decode_to_exe_d.valid = ~stall & valid_decode;
 
     always_ff @(negedge rstn_i, posedge clk_i) begin
         if (~rstn_i) begin
@@ -161,6 +165,8 @@ module datapath
     exe_to_mem_t exe_to_mem_d, exe_to_mem_q;
     
     exe exe_inst (
+        .clk_i(clk_i),
+        .rstn_i(rstn_i),
         .decode_to_exe_i(decode_to_exe_q),
         .exe_to_mem_o(exe_to_mem_d)
     );
@@ -196,11 +202,13 @@ module datapath
     // Writeback
 
     always_ff @(posedge clk_i) begin
-        print_commit(
-            mem_to_wb_q.instr.pc,
-            mem_to_wb_q.instr.instr.instruction,
-            mem_to_wb_q.result
-        );
+        if (mem_to_wb_q.valid) begin
+            print_commit(
+                mem_to_wb_q.instr.pc,
+                mem_to_wb_q.instr.instr.instruction,
+                mem_to_wb_q.result
+            );
+        end
     end
 
 endmodule

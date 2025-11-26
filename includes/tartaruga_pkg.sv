@@ -46,6 +46,7 @@ package tartaruga_pkg;
     typedef enum logic [1:0] {
         ALU,
         MEM,
+        MUL,
         PC_4
     } wb_origin_t;
 

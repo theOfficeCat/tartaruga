@@ -33,7 +33,7 @@ module exe
                 stall_o = 1'b1;
             end
             else begin
-                exe_pipe_d[MAX_EXE_STAGES - decode_to_exe_i.isntr.exe_stages] = decode_to_exe_i;
+                exe_pipe_d[MAX_EXE_STAGES - decode_to_exe_i.instr.exe_stages] = decode_to_exe_i;
             end
         end
     end
@@ -57,8 +57,8 @@ module exe
     mul mul_inst(
         .clk_i(clk_i),
         .rstn_i(rstn_i),
-        .data_rs1_i(data_rs1_i),
-        .data_rs2_i(data_rs2_i),
+        .data_rs1_i(alu_data_rs1),
+        .data_rs2_i(alu_data_rs2),
         .data_rd_o(res_mul)
     );
 
@@ -73,8 +73,9 @@ module exe
         .taken_o(taken_branch)
     );
 
-    assign exe_to_mem_o.branch_taken = taken_branch & decode_to_exe_i.valid;
-    assign exe_to_mem_o.instr = decode_to_exe_i.instr;
-    assign exe_to_mem_o.valid = decode_to_exe_i.valid;
-    assign exe_to_mem_o.data_rs2 = decode_to_exe_i.data_rs2;
+    assign exe_to_mem_o.branch_taken = taken_branch & exe_pipe_d[MAX_EXE_STAGES-1].valid;
+    assign exe_to_mem_o.instr = exe_pipe_d[MAX_EXE_STAGES-1].instr;
+    assign exe_to_mem_o.valid = exe_pipe_d[MAX_EXE_STAGES-1].valid;
+    assign exe_to_mem_o.data_rs2 = exe_pipe_d[MAX_EXE_STAGES-1].data_rs2;
+    assign exe_to_mem_o.result = (exe_pipe_d[MAX_EXE_STAGES-1].instr.is_mul == 1'b1) ? res_mul : res_alu;
 endmodule

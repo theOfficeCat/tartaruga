@@ -17,6 +17,8 @@ module decoder
         instr_decoded_o.addr_rs1 = instr_i.rtype.rs1;
         instr_decoded_o.addr_rs2 = instr_i.rtype.rs2;
         instr_decoded_o.addr_rd = instr_i.rtype.rd;
+        instr_decoded_o.exe_stages = 3'b1;
+        instr_decoded_o.is_mul = 1'b0;
        
         case (instr_i.rtype.opcode)
             OP_ALU_I: begin
@@ -117,13 +119,17 @@ module decoder
                 instr_decoded_o.jump_kind = BNONE;
 
                 case (instr_i.rtype.func3)
-                    F3_ADD_SUB: begin
+                    F3_ADD_SUB: begin // F3_MUL also
                         case (instr_i.rtype.func7)
                             F7_ALU_NORMAL: begin
                                 instr_decoded_o.alu_op = ADD;
                             end
                             F7_ALU_MODIFIED: begin
                                 instr_decoded_o.alu_op = SUB;
+                            end
+                            F7_MUL: begin
+                                instr_decoded_o.alu_op = ADD;
+                                instr_decoded_o.is_mul = 1'b1;
                             end
                             default: begin
                                 // illegal instruction treated as NOP being a x0 + x0

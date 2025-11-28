@@ -8,7 +8,7 @@ src_dir := .
 
 include $(src_dir)/rv32ui/Makefrag
 #include $(src_dir)/rv32uc/Makefrag
-#include $(src_dir)/rv32um/Makefrag
+include $(src_dir)/rv32um/Makefrag
 #include $(src_dir)/rv32ua/Makefrag
 #include $(src_dir)/rv32uf/Makefrag
 #include $(src_dir)/rv32ud/Makefrag

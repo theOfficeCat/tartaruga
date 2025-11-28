@@ -32,8 +32,13 @@ package riscv_pkg;
         F3_BGEU = 3'b111
     } f3_branch_t;
 
+    typedef enum logic [2:0] {
+        F3_MUL      = 3'b000
+    } f3_mul_t;
+
     typedef enum logic [6:0] {
         F7_ALU_NORMAL   = 7'b0000000,
+        F7_MUL          = 7'b0000001,
         F7_ALU_MODIFIED = 7'b0100000
     } f7_alu_modifier_t;
 

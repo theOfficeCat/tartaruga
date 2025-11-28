@@ -141,6 +141,9 @@ package tartaruga_pkg;
         logic store_to_mem;
 
         jump_kind_t jump_kind;
+
+        logic [2:0] exe_stages;
+        logic is_mul;
     } instr_data_t;
 
     typedef struct packed {
@@ -186,7 +189,9 @@ package tartaruga_pkg;
             alu_op:        ADD,
             wb_origin:     ALU,
             store_to_mem:  1'b0,
-            jump_kind:     BNONE
+            jump_kind:     BNONE,
+            exe_stages:    3'b1,
+            is_mul:        1'b0
         },
         valid:     1'b0,
         data_rs1:  '0,

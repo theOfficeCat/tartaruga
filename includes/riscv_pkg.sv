@@ -1,4 +1,6 @@
 package riscv_pkg;
+    import tartaruga_pkg::*;
+
     typedef enum logic [6:0] {
         OP_LW      = 7'b0000011,
         OP_ALU_I   = 7'b0010011,
@@ -41,5 +43,5 @@ package riscv_pkg;
     //
     // We can reuse the one for the ALU without immediate
 
-    logic [31:0] NOP_INSTR = 32'h00000033;
+    bus32_t NOP_INSTR_HEX = 32'h00000033;
 endpackage

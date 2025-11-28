@@ -4,8 +4,40 @@ module exe
     input logic clk_i,
     input logic rstn_i,
     input decode_to_exe_t decode_to_exe_i,
-    output exe_to_mem_t exe_to_mem_o
+    output exe_to_mem_t exe_to_mem_o,
+    output logic stall_o
 );
+
+    // Metadata pipe to also detect collisions
+    decode_to_exe_t exe_pipe_q [MAX_EXE_STAGES - 1:0];
+    decode_to_exe_t exe_pipe_d [MAX_EXE_STAGES - 1:0];
+
+    always_ff @(posedge clk_i or negedge rstn_i) begin
+        if (~rstn_i) begin
+            for (int i = 0; i < MAX_EXE_STAGES; ++i) begin
+                exe_pipe_q[i] <= NOP_INSTR;
+            end
+        end else begin
+            for (int i = 0; i < MAX_EXE_STAGES; ++i) begin
+                exe_pipe_q[i] <= exe_pipe_d[i];
+            end
+        end
+    end
+
+    always_comb begin
+        for (int i = 1; i < MAX_EXE_STAGES; ++i) begin
+            exe_pipe_d[i] = exe_pipe_q[i-1];
+            stall_o = 1'b0; // By default there is no collision
+
+            if (exe_pipe_q[MAX_EXE_STAGES - decode_to_exe_i.instr.exe_stages - 1].valid == 1'b1) begin
+                stall_o = 1'b1;
+            end
+            else begin
+                exe_pipe_d[MAX_EXE_STAGES - decode_to_exe_i.isntr.exe_stages] = decode_to_exe_i;
+            end
+        end
+    end
+
 
     bus32_t alu_data_rs1;
     bus32_t alu_data_rs2;

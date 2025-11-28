@@ -52,7 +52,7 @@ module datapath
         end else if (exe_to_mem_d.branch_taken == 1'b1 ||
                      mem_to_wb_d.branch_taken == 1'b1 ||
                      mem_to_wb_q.branch_taken == 1'b1) begin
-            instruction_q <= NOP_INSTR;
+            instruction_q <= NOP_INSTR_HEX;
             pc_decode <= '0;
             valid_decode <= 1'b0;
         end else begin
@@ -101,6 +101,7 @@ module datapath
     assign rs2_d = decode_to_exe_d.instr.addr_rs2;
 
     logic hazard_rs1, hazard_rs2;
+    logic stall_from_exe;
 
     always_comb begin
         hazard_rs1 = 1'b0;
@@ -118,29 +119,7 @@ module datapath
         hazard_rs1 |= reg_hazard(rs1_d, mem_to_wb_q.instr.addr_rd, mem_to_wb_q.instr.write_enable);
         hazard_rs2 |= reg_hazard(rs2_d, mem_to_wb_q.instr.addr_rd, mem_to_wb_q.instr.write_enable);
 
-        stall = hazard_rs1 || hazard_rs2;
-    end
-
-    decode_to_exe_t nop_instr;
-    
-    always_comb begin
-        nop_instr.instr.pc = '0;
-        nop_instr.instr.instr = 32'h00000033;
-        nop_instr.instr.addr_rs1 = '0;
-        nop_instr.instr.addr_rs2 = '0;
-        nop_instr.instr.addr_rd = '0;
-        nop_instr.instr.write_enable = '0;
-        nop_instr.instr.rs1_or_pc = RS1;
-        nop_instr.instr.rs2_or_imm = RS2;
-        nop_instr.instr.alu_op = ADD;
-        nop_instr.instr.wb_origin = ALU;
-        nop_instr.instr.store_to_mem = '0;
-        nop_instr.instr.jump_kind = BNONE;
-
-        nop_instr.valid = '0;
-        nop_instr.data_rs1 = '0;
-        nop_instr.data_rs2 = '0;
-        nop_instr.immediate = '0;
+        stall = hazard_rs1 | hazard_rs2 | stall_from_exe;
     end
 
     assign decode_to_exe_d.valid = ~stall & valid_decode;
@@ -151,12 +130,12 @@ module datapath
         end else begin
             if (!stall) begin
                 if (exe_to_mem_d.branch_taken == 1'b1) begin
-                    decode_to_exe_q <= nop_instr;
+                    decode_to_exe_q <= NOP_INSTR;
                 end else begin
                     decode_to_exe_q <= decode_to_exe_d;
                 end
             end else begin
-                decode_to_exe_q <= nop_instr;
+                decode_to_exe_q <= NOP_INSTR;
             end
         end
     end
@@ -168,7 +147,8 @@ module datapath
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .decode_to_exe_i(decode_to_exe_q),
-        .exe_to_mem_o(exe_to_mem_d)
+        .exe_to_mem_o(exe_to_mem_d),
+        .stall_o(stall_from_exe)
     );
 
     always_ff @(negedge rstn_i, posedge clk_i) begin

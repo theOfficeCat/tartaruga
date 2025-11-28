@@ -169,4 +169,30 @@ package tartaruga_pkg;
         bus32_t branched_pc;
     } mem_to_wb_t;
 
+    parameter EXE_STAGES_DEFAULT = 1;
+    parameter EXE_STAGES_MULT = 4;
+    parameter MAX_EXE_STAGES = (EXE_STAGES_DEFAULT > EXE_STAGES_MULT) ? EXE_STAGES_DEFAULT : EXE_STAGES_MULT;
+
+    localparam decode_to_exe_t NOP_INSTR = '{
+        instr: '{
+            pc:            '0,
+            instr:         32'h00000033,
+            addr_rs1:      '0,
+            addr_rs2:      '0,
+            addr_rd:       '0,
+            write_enable:  1'b0,
+            rs1_or_pc:     RS1,
+            rs2_or_imm:    RS2,
+            alu_op:        ADD,
+            wb_origin:     ALU,
+            store_to_mem:  1'b0,
+            jump_kind:     BNONE
+        },
+        valid:     1'b0,
+        data_rs1:  '0,
+        data_rs2:  '0,
+        immediate: '0
+    };
+
+
 endpackage

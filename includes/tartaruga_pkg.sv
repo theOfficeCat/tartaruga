@@ -200,4 +200,12 @@ package tartaruga_pkg;
     };
 
 
+    function automatic logic reg_hazard(
+        input logic [4:0] rs,
+        input logic [4:0] rd,
+        input logic write_en
+    );
+        return (write_en && (rd != 5'd0) && (rd == rs));
+    endfunction
+
 endpackage

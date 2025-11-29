@@ -130,6 +130,7 @@ module decoder
                             F7_MUL: begin
                                 instr_decoded_o.alu_op = ADD;
                                 instr_decoded_o.is_mul = 1'b1;
+                                instr_decoded_o.exe_stages = 3'd4;
                             end
                             default: begin
                                 // illegal instruction treated as NOP being a x0 + x0

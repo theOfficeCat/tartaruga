@@ -11,15 +11,6 @@ module datapath
     input logic clk_i,
     input logic rstn_i
 );
-    function automatic logic reg_hazard(
-        input logic [4:0] rs,
-        input logic [4:0] rd,
-        input logic write_en
-    );
-        return (write_en && (rd != 5'd0) && (rd == rs));
-    endfunction
-
-
     instruction_t instruction_d, instruction_q;
     bus32_t pc_fetch, pc_decode;
     logic valid_decode;
@@ -100,7 +91,7 @@ module datapath
     assign rs1_d = decode_to_exe_d.instr.addr_rs1;
     assign rs2_d = decode_to_exe_d.instr.addr_rs2;
 
-    logic hazard_rs1, hazard_rs2;
+    logic hazard_rs1, hazard_rs2, hazard_from_pipe;
     logic stall_from_exe;
 
     always_comb begin
@@ -119,7 +110,7 @@ module datapath
         hazard_rs1 |= reg_hazard(rs1_d, mem_to_wb_q.instr.addr_rd, mem_to_wb_q.instr.write_enable);
         hazard_rs2 |= reg_hazard(rs2_d, mem_to_wb_q.instr.addr_rd, mem_to_wb_q.instr.write_enable);
 
-        stall = hazard_rs1 | hazard_rs2 | stall_from_exe;
+        stall = hazard_rs1 | hazard_rs2 | stall_from_exe | hazard_from_pipe;
     end
 
     assign decode_to_exe_d.valid = ~stall & valid_decode;
@@ -148,7 +139,8 @@ module datapath
         .rstn_i(rstn_i),
         .decode_to_exe_i(decode_to_exe_q),
         .exe_to_mem_o(exe_to_mem_d),
-        .stall_o(stall_from_exe)
+        .stall_o(stall_from_exe),
+        .hazard_on_pipe_o(hazard_from_pipe)
     );
 
     always_ff @(negedge rstn_i, posedge clk_i) begin

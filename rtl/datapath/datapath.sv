@@ -138,6 +138,8 @@ module datapath
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .decode_to_exe_i(decode_to_exe_q),
+        .rs1_decoded(decode_to_exe_d.instr.addr_rs1),
+        .rs2_decoded(decode_to_exe_d.instr.addr_rs2),
         .exe_to_mem_o(exe_to_mem_d),
         .stall_o(stall_from_exe),
         .hazard_on_pipe_o(hazard_from_pipe)

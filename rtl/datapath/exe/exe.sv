@@ -4,6 +4,8 @@ module exe
     input logic clk_i,
     input logic rstn_i,
     input decode_to_exe_t decode_to_exe_i,
+    input reg_addr_t rs1_decoded,
+    input reg_addr_t rs2_decoded,
     output exe_to_mem_t exe_to_mem_o,
     output logic stall_o,
     output logic hazard_on_pipe_o
@@ -34,7 +36,7 @@ module exe
     
         exe_pipe_d[0] = NOP_INSTR;
 
-        if (exe_pipe_q[MAX_EXE_STAGES - decode_to_exe_i.instr.exe_stages - 1].valid == 1'b1) begin
+        if (exe_pipe_d[MAX_EXE_STAGES - decode_to_exe_i.instr.exe_stages].valid == 1'b1) begin
             stall_o = 1'b1;
         end
         else begin
@@ -47,13 +49,11 @@ module exe
     logic hazard_on_pipe;
 
     always_comb begin
-        rs1_d = decode_to_exe_i.instr.addr_rs1;
-        rs2_d = decode_to_exe_i.instr.addr_rs2;
         hazard_on_pipe = 1'b0;
 
         for (int i = 0; i < MAX_EXE_STAGES; ++i) begin
-            hazard_on_pipe |= reg_hazard(rs1_d, exe_pipe_q[i].instr.addr_rd, exe_pipe_q[i].valid);
-            hazard_on_pipe |= reg_hazard(rs2_d, exe_pipe_q[i].instr.addr_rd, exe_pipe_q[i].valid);
+            hazard_on_pipe |= reg_hazard(rs1_decoded, exe_pipe_d[i].instr.addr_rd, exe_pipe_d[i].valid);
+            hazard_on_pipe |= reg_hazard(rs2_decoded, exe_pipe_d[i].instr.addr_rd, exe_pipe_d[i].valid);
         end
     end
 
@@ -79,8 +79,6 @@ module exe
         .data_rs2_i(alu_data_rs2),
         .data_rd_o(res_mul)
     );
-
-    
 
     logic taken_branch;
 

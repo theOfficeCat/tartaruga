@@ -12,10 +12,14 @@ module decoder
     always_comb begin
         instr_decoded_o.pc = pc_i;
         instr_decoded_o.instr = instr_i;
+        //instr_decoded_o.addr_rs1 = (instr_decoded_o.rs1_or_pc == RS1) ? instr_i.rtype.rs1 : '0;
+        //instr_decoded_o.addr_rs2 = (instr_decoded_o.rs2_or_imm == RS2) ? instr_i.rtype.rs2 : '0;
         instr_decoded_o.addr_rs1 = instr_i.rtype.rs1;
         instr_decoded_o.addr_rs2 = instr_i.rtype.rs2;
         instr_decoded_o.addr_rd = instr_i.rtype.rd;
-        
+        instr_decoded_o.exe_stages = 3'b1;
+        instr_decoded_o.is_mul = 1'b0;
+       
         case (instr_i.rtype.opcode)
             OP_ALU_I: begin
                 instr_decoded_o.write_enable = 1'b1;
@@ -115,13 +119,18 @@ module decoder
                 instr_decoded_o.jump_kind = BNONE;
 
                 case (instr_i.rtype.func3)
-                    F3_ADD_SUB: begin
+                    F3_ADD_SUB: begin // F3_MUL also
                         case (instr_i.rtype.func7)
                             F7_ALU_NORMAL: begin
                                 instr_decoded_o.alu_op = ADD;
                             end
                             F7_ALU_MODIFIED: begin
                                 instr_decoded_o.alu_op = SUB;
+                            end
+                            F7_MUL: begin
+                                instr_decoded_o.alu_op = ADD;
+                                instr_decoded_o.is_mul = 1'b1;
+                                instr_decoded_o.exe_stages = 3'd4;
                             end
                             default: begin
                                 // illegal instruction treated as NOP being a x0 + x0
@@ -408,6 +417,16 @@ module decoder
                 instr_decoded_o.jump_kind = BNONE;
             end
         endcase
+
+        // hardwire source registers to x0 if there is no reading from there
+        // to avoid problems with hazard detection
+        if ((instr_decoded_o.rs1_or_pc == PC && instr_decoded_o.jump_kind == BNONE) || instr_i.rtype.opcode == OP_JAL) begin
+            instr_decoded_o.addr_rs1 = '0;
+        end
+
+        if ((instr_decoded_o.rs2_or_imm == IMM && instr_decoded_o.jump_kind == BNONE && instr_decoded_o.store_to_mem == 1'b0) || instr_i.rtype.opcode == OP_JAL) begin
+            instr_decoded_o.addr_rs2 = '0;
+        end
     end
 
 endmodule

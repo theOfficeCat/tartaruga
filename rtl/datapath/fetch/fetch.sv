@@ -5,6 +5,7 @@ module fetch
     input logic rstn_i,
     input logic taken_branch_i,
     input bus32_t new_pc_i,
+    input logic stall_i,
     output bus32_t pc_o,
     output instruction_t instr_o
 );
@@ -16,7 +17,7 @@ module fetch
         if (~rstn_i) begin
             pc_q <= 32'h80000000; // this makes easier to check AUIPC
         end
-        else begin
+        else if (~stall_i || taken_branch_i) begin
             pc_q <= pc_d;
         end
     end

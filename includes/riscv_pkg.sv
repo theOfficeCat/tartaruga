@@ -1,4 +1,6 @@
 package riscv_pkg;
+    import tartaruga_pkg::*;
+
     typedef enum logic [6:0] {
         OP_LW      = 7'b0000011,
         OP_ALU_I   = 7'b0010011,
@@ -30,8 +32,13 @@ package riscv_pkg;
         F3_BGEU = 3'b111
     } f3_branch_t;
 
+    typedef enum logic [2:0] {
+        F3_MUL      = 3'b000
+    } f3_mul_t;
+
     typedef enum logic [6:0] {
         F7_ALU_NORMAL   = 7'b0000000,
+        F7_MUL          = 7'b0000001,
         F7_ALU_MODIFIED = 7'b0100000
     } f7_alu_modifier_t;
 
@@ -40,4 +47,6 @@ package riscv_pkg;
     //} f3_alu_i_t;
     //
     // We can reuse the one for the ALU without immediate
+
+    bus32_t NOP_INSTR_HEX = 32'h00000033;
 endpackage

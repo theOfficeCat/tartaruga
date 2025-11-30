@@ -46,6 +46,7 @@ package tartaruga_pkg;
     typedef enum logic [1:0] {
         ALU,
         MEM,
+        MUL,
         PC_4
     } wb_origin_t;
 
@@ -140,10 +141,14 @@ package tartaruga_pkg;
         logic store_to_mem;
 
         jump_kind_t jump_kind;
+
+        logic [2:0] exe_stages;
+        logic is_mul;
     } instr_data_t;
 
     typedef struct packed {
         instr_data_t instr;
+        logic valid;
         bus32_t data_rs1;
         bus32_t data_rs2;
         bus32_t immediate;
@@ -151,6 +156,7 @@ package tartaruga_pkg;
 
     typedef struct packed {
         instr_data_t instr;
+        logic valid;
         bus32_t data_rs2;
         bus32_t result;
 
@@ -159,10 +165,47 @@ package tartaruga_pkg;
 
     typedef struct packed {
         instr_data_t instr;
+        logic valid;
         bus32_t result;
 
         logic branch_taken;
         bus32_t branched_pc;
     } mem_to_wb_t;
+
+    parameter EXE_STAGES_DEFAULT = 1;
+    parameter EXE_STAGES_MULT = 4;
+    parameter MAX_EXE_STAGES = (EXE_STAGES_DEFAULT > EXE_STAGES_MULT) ? EXE_STAGES_DEFAULT : EXE_STAGES_MULT;
+
+    localparam decode_to_exe_t NOP_INSTR = '{
+        instr: '{
+            pc:            '0,
+            instr:         32'h00000033,
+            addr_rs1:      '0,
+            addr_rs2:      '0,
+            addr_rd:       '0,
+            write_enable:  1'b0,
+            rs1_or_pc:     RS1,
+            rs2_or_imm:    RS2,
+            alu_op:        ADD,
+            wb_origin:     ALU,
+            store_to_mem:  1'b0,
+            jump_kind:     BNONE,
+            exe_stages:    3'b1,
+            is_mul:        1'b0
+        },
+        valid:     1'b0,
+        data_rs1:  '0,
+        data_rs2:  '0,
+        immediate: '0
+    };
+
+
+    function automatic logic reg_hazard(
+        input logic [4:0] rs,
+        input logic [4:0] rd,
+        input logic write_en
+    );
+        return (write_en && (rd != 5'd0) && (rd == rs));
+    endfunction
 
 endpackage

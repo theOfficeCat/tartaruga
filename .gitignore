@@ -1,7 +1,6 @@
 obj_dir/
 *.vcd
 *.fst
-*.ron
 tests/*.out
 *.program
 *.commit

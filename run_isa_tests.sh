@@ -4,14 +4,15 @@ rm -rf assembled_tests
 mkdir assembled_tests
 
 cp riscv-tests/isa/rv32ui-p* assembled_tests
+cp riscv-tests/isa/rv32um-p* assembled_tests
 rm assembled_tests/*.dump
 
 rm -rf to_run
 mkdir to_run
 
-unsupported=( "fence_i" "jalr" "lb" "lbu" "lh" "lhu" "ma_data" "sb" "sh" "ld_st" )
+unsupported=( "fence_i" "jalr" "lb" "lbu" "lh" "lhu" "ma_data" "sb" "sh" "ld_st" "mulh" "mulhu" "mulhsu" "div" "divu" "rem" "remu" )
 
-for test in assembled_tests/rv32ui-p-*;
+for test in assembled_tests/rv32u*-p-*;
 do
     supported=1
     for unsup in "${unsupported[@]}";

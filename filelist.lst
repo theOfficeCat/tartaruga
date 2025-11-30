@@ -12,6 +12,7 @@ rtl/datapath/decode/immediate.sv
 
 rtl/datapath/exe/exe.sv
 rtl/datapath/exe/alu.sv
+rtl/datapath/exe/mul.sv
 rtl/datapath/exe/branch.sv
 
 rtl/datapath/mem/mem.sv

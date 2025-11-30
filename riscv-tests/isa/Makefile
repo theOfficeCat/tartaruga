@@ -8,7 +8,7 @@ src_dir := .
 
 include $(src_dir)/rv32ui/Makefrag
 #include $(src_dir)/rv32uc/Makefrag
-#include $(src_dir)/rv32um/Makefrag
+include $(src_dir)/rv32um/Makefrag
 #include $(src_dir)/rv32ua/Makefrag
 #include $(src_dir)/rv32uf/Makefrag
 #include $(src_dir)/rv32ud/Makefrag
@@ -67,6 +67,7 @@ endif
 endef
 
 $(eval $(call compile_template,rv32ui,-march=rv32g -mabi=ilp32))
+$(eval $(call compile_template,rv32um,-march=rv32g -mabi=ilp32))
 
 tests_dump = $(addsuffix .dump, $(tests))
 tests_hex = $(addsuffix .hex, $(tests))

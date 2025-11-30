@@ -73,6 +73,13 @@ RVTEST_CODE_BEGIN
   TEST_RR_ZEROSRC12( 37, add, 0 );
   TEST_RR_ZERODEST( 38, add, 16, 30 );
 
+  mul x0, x1, x2
+  add x3, x4, x5
+  add x6, x7, x8
+  add x9, x10, x11
+  add x12, x13, x14
+  add x15, x16, x17
+
   TEST_PASSFAIL
 
 RVTEST_CODE_END

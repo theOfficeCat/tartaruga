@@ -27,6 +27,7 @@ Subset muy subsetero de RV32I
 - SLTIU
 - AUIPC
 - LUI
+- MUL (4 ciclos)
 
 ### Flow control
 

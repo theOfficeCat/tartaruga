@@ -28,9 +28,9 @@ module exe
     end
 
     always_comb begin
+        stall_o = 1'b0; // By default there is no collision
         for (int i = 1; i < MAX_EXE_STAGES; ++i) begin
             exe_pipe_d[i] = exe_pipe_q[i-1];
-            stall_o = 1'b0; // By default there is no collision
 
         end
     

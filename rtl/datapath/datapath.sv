@@ -126,7 +126,9 @@ module datapath
                     decode_to_exe_q <= decode_to_exe_d;
                 end
             end else begin
-                decode_to_exe_q <= NOP_INSTR;
+                if (!stall_from_exe) begin
+                    decode_to_exe_q <= NOP_INSTR;
+                end
             end
         end
     end

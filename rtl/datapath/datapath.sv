@@ -40,6 +40,7 @@ module datapath
         if (~rstn_i) begin
             instruction_q <= '0;
             pc_decode <= '0;
+            valid_decode <= 1'b0;
         end else if (exe_to_mem_d.branch_taken == 1'b1 ||
                      mem_to_wb_d.branch_taken == 1'b1 ||
                      mem_to_wb_q.branch_taken == 1'b1) begin

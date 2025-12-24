@@ -4,7 +4,8 @@ includes/riscv_pkg.sv
 rtl/top.sv
 rtl/datapath/datapath.sv
 rtl/datapath/fetch/fetch.sv
-rtl/datapath/fetch/dummy_imem.sv
+rtl/caches/imem_wrapper.sv
+rtl/caches/icache.sv
 
 rtl/datapath/decode/decoder.sv
 rtl/datapath/decode/regfile.sv

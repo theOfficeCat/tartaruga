@@ -26,12 +26,25 @@ module fetch
 
     assign pc_o = pc_q;
 
-    // Instruction memory
-    dummy_imem dummy_imem_inst (
+    bus32_t        mem_pc;
+    instruction_t mem_instr;
+
+    icache icache (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .pc_i(pc_q),
+
+        .mem_pc_o(mem_pc),
+        .mem_instr_i(mem_instr),
+
         .instr_o(instr_o)
+    );
+
+    imem_wrapper imem_wrapper (
+        .clk_i(clk_i),
+        .rstn_i(rstn_i),
+        .pc_i(mem_pc),
+        .instr_o(mem_instr)
     );
 
 endmodule

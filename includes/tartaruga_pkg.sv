@@ -127,7 +127,7 @@ package tartaruga_pkg;
     typedef struct packed {
         bus32_t pc;
         instruction_t instr;
-        
+
         reg_addr_t addr_rs1;
         reg_addr_t addr_rs2;
         reg_addr_t addr_rd;
@@ -149,10 +149,18 @@ package tartaruga_pkg;
     typedef struct packed {
         instr_data_t instr;
         logic valid;
+//        bus32_t data_rs1;
+//        bus32_t data_rs2;
+        bus32_t immediate;
+    } decode_to_rr_t;
+
+    typedef struct packed {
+        instr_data_t instr;
+        logic valid;
         bus32_t data_rs1;
         bus32_t data_rs2;
         bus32_t immediate;
-    } decode_to_exe_t;
+    } rr_to_exe_t;
 
     typedef struct packed {
         instr_data_t instr;
@@ -176,7 +184,28 @@ package tartaruga_pkg;
     parameter EXE_STAGES_MULT = 4;
     parameter MAX_EXE_STAGES = (EXE_STAGES_DEFAULT > EXE_STAGES_MULT) ? EXE_STAGES_DEFAULT : EXE_STAGES_MULT;
 
-    localparam decode_to_exe_t NOP_INSTR = '{
+    localparam decode_to_rr_t NOP_INSTR_TO_RR = '{
+        instr: '{
+            pc:            '0,
+            instr:         32'h00000033,
+            addr_rs1:      '0,
+            addr_rs2:      '0,
+            addr_rd:       '0,
+            write_enable:  1'b0,
+            rs1_or_pc:     RS1,
+            rs2_or_imm:    RS2,
+            alu_op:        ADD,
+            wb_origin:     ALU,
+            store_to_mem:  1'b0,
+            jump_kind:     BNONE,
+            exe_stages:    3'b1,
+            is_mul:        1'b0
+        },
+        valid:     1'b0,
+        immediate: '0
+    };
+
+    localparam rr_to_exe_t NOP_INSTR_TO_EXE = '{
         instr: '{
             pc:            '0,
             instr:         32'h00000033,

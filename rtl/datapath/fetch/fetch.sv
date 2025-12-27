@@ -7,7 +7,8 @@ module fetch
     input bus32_t new_pc_i,
     input logic stall_i,
     output bus32_t pc_o,
-    output instruction_t instr_o
+    output instruction_t instr_o,
+    output logic valid_o
 );
 
     // PC logic
@@ -33,5 +34,7 @@ module fetch
         .pc_i(pc_q),
         .instr_o(instr_o)
     );
+
+    assign valid_o = 1'b1;
 
 endmodule

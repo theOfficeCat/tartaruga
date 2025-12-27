@@ -11,10 +11,12 @@ module datapath
     input logic clk_i,
     input logic rstn_i
 );
+    logic valid_fetch;
+
     instruction_t instruction_d, instruction_q;
     bus32_t pc_fetch, pc_decode;
     logic valid_decode;
-    
+
     // Fetch
     fetch fetch_inst (
         .clk_i(clk_i),
@@ -23,7 +25,8 @@ module datapath
         .new_pc_i(mem_to_wb_q.branched_pc),
         .stall_i(stall),
         .pc_o(pc_fetch),
-        .instr_o(instruction_d)
+        .instr_o(instruction_d),
+        .valid_o(valid_fetch)
     );
 /*
     always_ff @(negedge rstn_i, posedge clk_i) begin
@@ -111,7 +114,7 @@ module datapath
         hazard_rs1 |= reg_hazard(rs1_d, mem_to_wb_q.instr.addr_rd, mem_to_wb_q.instr.write_enable);
         hazard_rs2 |= reg_hazard(rs2_d, mem_to_wb_q.instr.addr_rd, mem_to_wb_q.instr.write_enable);
 
-        stall = hazard_rs1 | hazard_rs2 | stall_from_exe | hazard_from_pipe;
+        stall = hazard_rs1 | hazard_rs2 | stall_from_exe | hazard_from_pipe | (~valid_fetch);
     end
 
     assign decode_to_exe_d.valid = ~stall & valid_decode;
@@ -136,7 +139,7 @@ module datapath
 
     // Exe
     exe_to_mem_t exe_to_mem_d, exe_to_mem_q;
-    
+
     exe exe_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
@@ -156,7 +159,7 @@ module datapath
         end
     end
 
- 
+
     // Mem
     mem_to_wb_t mem_to_wb_d, mem_to_wb_q;
 
@@ -175,7 +178,7 @@ module datapath
         end
     end
 
- 
+
     // Writeback
 
     always_ff @(posedge clk_i) begin

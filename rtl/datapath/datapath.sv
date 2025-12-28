@@ -17,13 +17,17 @@ module datapath
     bus32_t pc_fetch, pc_decode;
     logic valid_decode;
 
+    logic stall_fetch;
+
+    assign stall_fetch = stall | ~valid_decode;
+
     // Fetch
     fetch fetch_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .taken_branch_i(mem_to_wb_q.branch_taken),
         .new_pc_i(mem_to_wb_q.branched_pc),
-        .stall_i(stall),
+        .stall_i(stall_fetch),
         .pc_o(pc_fetch),
         .instr_o(instruction_d),
         .valid_o(valid_fetch)

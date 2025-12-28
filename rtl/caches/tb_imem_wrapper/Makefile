@@ -15,6 +15,8 @@ VERILATOR_FLAGS := \
 	--timing \
 	--trace \
 	--trace-fst \
+	--trace-structs \
+	--trace-depth 99 \
 	--Wno-UNUSEDPARAM \
 	--Wno-INITIALDLY \
 	-DTB \

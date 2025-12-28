@@ -7,3 +7,4 @@ tests/*.out
 *.elf
 assembled_tests/*
 tmp_file
+rtl/**/*.surf.ron

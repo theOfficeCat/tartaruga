@@ -124,10 +124,30 @@ package tartaruga_pkg;
         // Add types of instructions as structs of 32 bits to ease the decode
     } instruction_t;
 
+    localparam ROB_SIZE = 16;
+    localparam ROB_IDX_BITS = $clog2(ROB_SIZE);
+
+    typedef logic[ROB_IDX_BITS-1:0] rob_idx_t;
+
+    typedef struct packed {
+        logic valid;
+        logic completed;
+
+        bus32_t pc;
+        instruction_t instr;
+
+        reg_addr_t addr_rd;
+        logic write_enable;
+        logic store_to_mem;
+        bus32_t result;
+        bus32_t new_pc;
+        logic branch_taken;
+    } rob_entry_t;
+
     typedef struct packed {
         bus32_t pc;
         instruction_t instr;
-        
+
         reg_addr_t addr_rs1;
         reg_addr_t addr_rs2;
         reg_addr_t addr_rd;
@@ -144,6 +164,8 @@ package tartaruga_pkg;
 
         logic [2:0] exe_stages;
         logic is_mul;
+
+        rob_idx_t rob_idx;
     } instr_data_t;
 
     typedef struct packed {
@@ -191,7 +213,8 @@ package tartaruga_pkg;
             store_to_mem:  1'b0,
             jump_kind:     BNONE,
             exe_stages:    3'b1,
-            is_mul:        1'b0
+            is_mul:        1'b0,
+            rob_idx:       '0
         },
         valid:     1'b0,
         data_rs1:  '0,

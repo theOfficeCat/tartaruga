@@ -32,6 +32,10 @@ module tb_rob;
 
     logic rob_full_o;
 
+    logic rs1_addr_i;
+    logic rs2_addr_i;
+    logic hazard_o;
+
     rob dut (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
@@ -57,7 +61,10 @@ module tb_rob;
         .commit_store_to_mem_o(commit_store_to_mem_o),
         .commit_new_pc_o(commit_new_pc_o),
         .commit_branch_taken_o(commit_branch_taken_o),
-        .rob_full_o(rob_full_o)
+        .rob_full_o(rob_full_o),
+        .rs1_addr_i(rs1_addr_i),
+        .rs2_addr_i(rs2_addr_i),
+        .hazard_o(hazard_o)
     );
 
     initial clk_i = 0;
@@ -81,6 +88,8 @@ module tb_rob;
         result_i = '0;
         new_pc_i = '0;
         branch_taken_i = 0;
+        rs1_addr_i = 0;
+        rs2_addr_i = 0;
 
         #20;
         rstn_i = 1;

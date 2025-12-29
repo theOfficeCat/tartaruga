@@ -113,31 +113,10 @@ module datapath
     assign rs1_d = decode_to_exe_d.instr.addr_rs1;
     assign rs2_d = decode_to_exe_d.instr.addr_rs2;
 
-    logic hazard_rs1, hazard_rs2, hazard_from_pipe;
-
     logic hazard_rob;
     logic stall_from_exe;
 
-    always_comb begin
-        hazard_rs1 = 1'b0;
-        hazard_rs2 = 1'b0;
-
-        // EXE stage (instruction currently in EXE pipeline register)
-        hazard_rs1 |= reg_hazard(rs1_d, decode_to_exe_q.instr.addr_rd, decode_to_exe_q.instr.write_enable);
-        hazard_rs2 |= reg_hazard(rs2_d, decode_to_exe_q.instr.addr_rd, decode_to_exe_q.instr.write_enable);
-
-        // EXE->MEM stage
-        hazard_rs1 |= reg_hazard(rs1_d, exe_to_mem_q.instr.addr_rd, exe_to_mem_q.instr.write_enable);
-        hazard_rs2 |= reg_hazard(rs2_d, exe_to_mem_q.instr.addr_rd, exe_to_mem_q.instr.write_enable);
-
-        // MEM->WB stage
-        hazard_rs1 |= reg_hazard(rs1_d, mem_to_wb_q.instr.addr_rd, mem_to_wb_q.instr.write_enable);
-        hazard_rs2 |= reg_hazard(rs2_d, mem_to_wb_q.instr.addr_rd, mem_to_wb_q.instr.write_enable);
-
-        //stall = hazard_rs1 | hazard_rs2 | stall_from_exe | hazard_from_pipe | (~valid_fetch) | rob_full;
-
-        stall = hazard_rob | stall_from_exe | (~valid_fetch) | rob_full;
-    end
+    assign stall = hazard_rob | stall_from_exe | (~valid_fetch) | rob_full;
 
     assign decode_to_exe_d.valid = ~stall & valid_decode;
 
@@ -169,8 +148,7 @@ module datapath
         .rs1_decoded(decode_to_exe_d.instr.addr_rs1),
         .rs2_decoded(decode_to_exe_d.instr.addr_rs2),
         .exe_to_mem_o(exe_to_mem_d),
-        .stall_o(stall_from_exe),
-        .hazard_on_pipe_o(hazard_from_pipe)
+        .stall_o(stall_from_exe)
     );
 
     always_ff @(negedge rstn_i, posedge clk_i) begin

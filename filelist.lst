@@ -18,3 +18,5 @@ rtl/datapath/exe/branch.sv
 
 rtl/datapath/mem/mem.sv
 rtl/datapath/mem/dummy_dmem.sv
+
+rtl/datapath/wb/rob.sv

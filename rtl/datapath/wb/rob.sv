@@ -35,7 +35,11 @@ module rob
     output bus32_t       commit_new_pc_o,
     output logic         commit_branch_taken_o,
 
-    output logic         rob_full_o
+    output logic         rob_full_o,
+
+    input  reg_addr_t     rs1_addr_i,
+    input  reg_addr_t     rs2_addr_i,
+    output logic          hazard_o
 );
 
     rob_entry_t rob_q [ROB_SIZE-1:0];
@@ -103,9 +107,27 @@ module rob
         end
 
         // Branch taken -> flush ROB entries when the branch is commited
+        `ifdef TB
         if ((rob_q[head_ptr_q].valid && rob_q[head_ptr_q].completed && rob_q[head_ptr_q].branch_taken) || flush_i) begin
+        `else
+        if (rob_q[head_ptr_q].valid && rob_q[head_ptr_q].completed && rob_q[head_ptr_q].branch_taken) begin
+        `endif
             for (int i = 0; i < ROB_SIZE; ++i) begin
                 rob_d[i].valid      = 1'b0;
+            end
+            head_ptr_d = '0;
+            tail_ptr_d = '0;
+        end
+
+        // Hazard detection
+        hazard_o = 1'b0;
+        for (int i = 0; i < ROB_SIZE; ++i) begin
+            if (rob_q[i].valid) begin
+                if (rob_q[i].addr_rd != 0 && rob_q[i].write_enable == 1'b1) begin
+                    if ((rob_q[i].addr_rd == rs1_addr_i) || (rob_q[i].addr_rd == rs2_addr_i)) begin
+                    hazard_o = 1'b1;
+                    end
+                end
             end
         end
     end

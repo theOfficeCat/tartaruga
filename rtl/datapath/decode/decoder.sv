@@ -4,6 +4,7 @@ module decoder
 (
     input bus32_t pc_i,
     input instruction_t instr_i,
+    input rob_idx_t rob_idx_i,
     output instr_data_t instr_decoded_o
 );
 
@@ -19,7 +20,8 @@ module decoder
         instr_decoded_o.addr_rd = instr_i.rtype.rd;
         instr_decoded_o.exe_stages = 3'b1;
         instr_decoded_o.is_mul = 1'b0;
-       
+        instr_decoded_o.rob_idx = rob_idx_i;
+
         case (instr_i.rtype.opcode)
             OP_ALU_I: begin
                 instr_decoded_o.write_enable = 1'b1;
@@ -298,7 +300,7 @@ module decoder
                             end
                         endcase
                     end
- 
+
                     default: begin
                         // illegal instruction treated as NOP being a x0 + x0
                         // without write

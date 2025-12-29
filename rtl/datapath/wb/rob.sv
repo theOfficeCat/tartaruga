@@ -38,8 +38,16 @@ module rob
     output logic         rob_full_o,
 
     input  reg_addr_t     rs1_addr_i,
+    output logic          hazard_rs1_o,
+    output rob_idx_t      rob_entry_rs1_o,
+    output logic          completed_rs1_o,
+    output bus32_t        result_rs1_o,
+
     input  reg_addr_t     rs2_addr_i,
-    output logic          hazard_o
+    output logic          hazard_rs2_o,
+    output rob_idx_t      rob_entry_rs2_o,
+    output logic          completed_rs2_o,
+    output bus32_t        result_rs2_o
 );
 
     rob_entry_t rob_q [ROB_SIZE-1:0];
@@ -49,6 +57,9 @@ module rob
 
     assign rob_entry_alloc_o = tail_ptr_q;
     assign rob_full_o = (((tail_ptr_q + 1) % ROB_SIZE) == head_ptr_q) && rob_q[head_ptr_q].valid; // Full when next tail equals head and head is valid
+
+    logic found_hazard_rs1;
+    logic found_hazard_rs2;
 
     always_comb begin
         for (int i = 0; i < ROB_SIZE; ++i) begin
@@ -120,13 +131,43 @@ module rob
         end
 
         // Hazard detection
-        hazard_o = 1'b0;
-        for (int i = 0; i < ROB_SIZE; ++i) begin
+        hazard_rs1_o     = 1'b0;
+        rob_entry_rs1_o  = '0;
+        completed_rs1_o  = 1'b0;
+        result_rs1_o     = '0;
+        hazard_rs2_o     = 1'b0;
+        rob_entry_rs2_o  = '0;
+        completed_rs2_o  = 1'b0;
+        result_rs2_o     = '0;
+
+        found_hazard_rs1 = 1'b0;
+        found_hazard_rs2 = 1'b0;
+
+        for (int i = (tail_ptr_q - 1)%ROB_SIZE; i != tail_ptr_q; i = (i - 1 + ROB_SIZE)%ROB_SIZE) begin
+            // tail_ptr_q - 1 is the last allocated entry
+            // We go backwards to find the most recent valid instruction that writes to the same register
+            // As the currently writing instruction will go to the tail_ptr_q position we stop at tail_ptr_q + 1
             if (rob_q[i].valid) begin
-                if (rob_q[i].addr_rd != 0 && rob_q[i].write_enable == 1'b1) begin
-                    if ((rob_q[i].addr_rd == rs1_addr_i) || (rob_q[i].addr_rd == rs2_addr_i)) begin
-                    hazard_o = 1'b1;
-                    end
+                if (rob_q[i].addr_rd == rs1_addr_i && rob_q[i].write_enable && rob_q[i].addr_rd != 0 && ~found_hazard_rs1) begin
+                    hazard_rs1_o    = 1'b1;
+                    rob_entry_rs1_o = i;
+                    completed_rs1_o = rob_q[i].completed;
+                    result_rs1_o    = rob_q[i].result;
+                    found_hazard_rs1 = 1'b1;
+                    //break;
+                end
+            end
+        end
+
+        for (int i = (tail_ptr_q - 1)%ROB_SIZE; i != tail_ptr_q; i = (i - 1 + ROB_SIZE)%ROB_SIZE) begin
+            if (rob_q[i].valid) begin
+                if (rob_q[i].addr_rd == rs2_addr_i && rob_q[i].write_enable && rob_q[i].addr_rd != 0 && ~found_hazard_rs2) begin
+                    hazard_rs2_o    = 1'b1;
+                    rob_entry_rs2_o = i;
+                    completed_rs2_o = rob_q[i].completed;
+                    result_rs2_o    = rob_q[i].result;
+                    found_hazard_rs2 = 1'b1;
+                    //break;
                 end
             end
         end

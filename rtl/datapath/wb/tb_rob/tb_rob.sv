@@ -34,7 +34,16 @@ module tb_rob;
 
     logic rs1_addr_i;
     logic rs2_addr_i;
-    logic hazard_o;
+
+    rob_idx_t rob_entry_hazard_rs1;
+    logic hazard_rob_rs1;
+    logic completed_hazard_rs1;
+    bus32_t result_hazard_rs1;
+
+    rob_idx_t rob_entry_hazard_rs2;
+    logic hazard_rob_rs2;
+    logic completed_hazard_rs2;
+    bus32_t result_hazard_rs2;
 
     rob dut (
         .clk_i(clk_i),
@@ -63,8 +72,15 @@ module tb_rob;
         .commit_branch_taken_o(commit_branch_taken_o),
         .rob_full_o(rob_full_o),
         .rs1_addr_i(rs1_addr_i),
+        .hazard_rs1_o(hazard_rob_rs1),
+        .rob_entry_rs1_o(rob_entry_hazard_rs1),
+        .completed_rs1_o(completed_hazard_rs1),
+        .result_rs1_o(result_hazard_rs1),
         .rs2_addr_i(rs2_addr_i),
-        .hazard_o(hazard_o)
+        .hazard_rs2_o(hazard_rob_rs2),
+        .rob_entry_rs2_o(rob_entry_hazard_rs2),
+        .completed_rs2_o(completed_hazard_rs2),
+        .result_rs2_o(result_hazard_rs2)
     );
 
     initial clk_i = 0;

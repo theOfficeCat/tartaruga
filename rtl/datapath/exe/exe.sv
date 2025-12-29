@@ -7,8 +7,7 @@ module exe
     input reg_addr_t rs1_decoded,
     input reg_addr_t rs2_decoded,
     output exe_to_mem_t exe_to_mem_o,
-    output logic stall_o,
-    output logic hazard_on_pipe_o
+    output logic stall_o
 );
 
     // Metadata pipe to also detect collisions
@@ -33,7 +32,7 @@ module exe
             exe_pipe_d[i] = exe_pipe_q[i-1];
 
         end
-    
+
         exe_pipe_d[0] = NOP_INSTR;
 
         if (exe_pipe_d[MAX_EXE_STAGES - decode_to_exe_i.instr.exe_stages].valid == 1'b1) begin
@@ -45,17 +44,6 @@ module exe
     end
 
     reg_addr_t rs1_d, rs2_d;
-
-    logic hazard_on_pipe;
-
-    always_comb begin
-        hazard_on_pipe = 1'b0;
-
-        for (int i = 0; i < MAX_EXE_STAGES; ++i) begin
-            hazard_on_pipe |= reg_hazard(rs1_decoded, exe_pipe_d[i].instr.addr_rd, exe_pipe_d[i].valid);
-            hazard_on_pipe |= reg_hazard(rs2_decoded, exe_pipe_d[i].instr.addr_rd, exe_pipe_d[i].valid);
-        end
-    end
 
     bus32_t alu_data_rs1;
     bus32_t alu_data_rs2;
@@ -94,5 +82,4 @@ module exe
     assign exe_to_mem_o.valid = exe_pipe_d[MAX_EXE_STAGES-1].valid;
     assign exe_to_mem_o.data_rs2 = exe_pipe_d[MAX_EXE_STAGES-1].data_rs2;
     assign exe_to_mem_o.result = (exe_pipe_d[MAX_EXE_STAGES-1].instr.is_mul == 1'b1) ? res_mul : res_alu;
-    assign hazard_on_pipe_o = hazard_on_pipe;
 endmodule

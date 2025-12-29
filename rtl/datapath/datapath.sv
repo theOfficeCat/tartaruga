@@ -59,7 +59,7 @@ module datapath
             instruction_q <= '0;
             pc_decode <= '0;
             valid_decode <= 1'b0;
-            //end else if (exe_to_mem_d.branch_taken == 1'b1 ||
+        //end else if (exe_to_mem_d.branch_taken == 1'b1 ||
             //         mem_to_wb_d.branch_taken == 1'b1 ||
             //         mem_to_wb_q.branch_taken == 1'b1) begin
             //instruction_q <= NOP_INSTR_HEX;
@@ -83,6 +83,8 @@ module datapath
 
     rob_idx_t rob_entry_decode;
 
+    bus32_t regfile_rs1_data, regfile_rs2_data;
+
     decoder decoder_inst (
         .pc_i(pc_decode),
         .instr_i(instruction_q),
@@ -103,20 +105,67 @@ module datapath
         .addr_rd_i(commit_rd_addr),
         .data_rd_i(commit_result),
         .write_enable_i(commit_write_enable),
-        .data_rs1_o(decode_to_exe_d.data_rs1),
-        .data_rs2_o(decode_to_exe_d.data_rs2)
+        .data_rs1_o(regfile_rs1_data),
+        .data_rs2_o(regfile_rs2_data)
     );
 
     logic stall;
 
-    reg_addr_t rs1_d, rs2_d;
-    assign rs1_d = decode_to_exe_d.instr.addr_rs1;
-    assign rs2_d = decode_to_exe_d.instr.addr_rs2;
-
+    logic hazard_rob_rs1, hazard_rob_rs2;
     logic hazard_rob;
+
+    assign hazard_rob = hazard_rob_rs1 | hazard_rob_rs2;
+
+    rob_idx_t rob_entry_hazard_rs1, rob_entry_hazard_rs2;
+    logic completed_hazard_rs1, completed_hazard_rs2;
+    bus32_t result_hazard_rs1, result_hazard_rs2;
+
     logic stall_from_exe;
 
-    assign stall = hazard_rob | stall_from_exe | (~valid_fetch) | rob_full;
+    logic solved_hazard_rs1, solved_hazard_rs2;
+    logic solved_hazard;
+
+    assign solved_hazard = solved_hazard_rs1 & solved_hazard_rs2;
+
+    always_comb begin
+        decode_to_exe_d.data_rs1 = regfile_rs1_data;
+        decode_to_exe_d.data_rs2 = regfile_rs2_data;
+
+        solved_hazard_rs1 = !hazard_rob_rs1;
+        solved_hazard_rs2 = !hazard_rob_rs2;
+
+        if (hazard_rob_rs1) begin
+            if (completed_hazard_rs1) begin
+                decode_to_exe_d.data_rs1 = result_hazard_rs1;
+                solved_hazard_rs1 = 1'b1;
+            end else begin
+                if (rob_entry_hazard_rs1 == exe_to_mem_d.instr.rob_idx && exe_to_mem_d.valid) begin
+                    decode_to_exe_d.data_rs1 = exe_to_mem_d.result;
+                    solved_hazard_rs1 = 1'b1;
+                end else if (rob_entry_hazard_rs1 == mem_to_wb_d.instr.rob_idx && mem_to_wb_d.valid) begin
+                    decode_to_exe_d.data_rs1 = mem_to_wb_d.result;
+                    solved_hazard_rs1 = 1'b1;
+                end
+            end
+        end
+
+        if (hazard_rob_rs2) begin
+            if (completed_hazard_rs2) begin
+                decode_to_exe_d.data_rs2 = result_hazard_rs2;
+                solved_hazard_rs2 = 1'b1;
+            end else begin
+                if (rob_entry_hazard_rs2 == exe_to_mem_d.instr.rob_idx && exe_to_mem_d.valid) begin
+                    decode_to_exe_d.data_rs2 = exe_to_mem_d.result;
+                    solved_hazard_rs2 = 1'b1;
+                end else if (rob_entry_hazard_rs2 == mem_to_wb_d.instr.rob_idx && mem_to_wb_d.valid) begin
+                    decode_to_exe_d.data_rs2 = mem_to_wb_d.result;
+                    solved_hazard_rs2 = 1'b1;
+                end
+            end
+        end
+    end
+
+    assign stall = (hazard_rob & ~solved_hazard) | stall_from_exe | (~valid_fetch) | rob_full;
 
     assign decode_to_exe_d.valid = ~stall & valid_decode;
 
@@ -210,8 +259,16 @@ module datapath
         .rob_full_o(rob_full),
 
         .rs1_addr_i(decode_to_exe_d.instr.addr_rs1),
+        .hazard_rs1_o(hazard_rob_rs1),
+        .rob_entry_rs1_o(rob_entry_hazard_rs1),
+        .completed_rs1_o(completed_hazard_rs1),
+        .result_rs1_o(result_hazard_rs1),
+
         .rs2_addr_i(decode_to_exe_d.instr.addr_rs2),
-        .hazard_o(hazard_rob)
+        .hazard_rs2_o(hazard_rob_rs2),
+        .rob_entry_rs2_o(rob_entry_hazard_rs2),
+        .completed_rs2_o(completed_hazard_rs2),
+        .result_rs2_o(result_hazard_rs2)
     );
 
     // Writeback

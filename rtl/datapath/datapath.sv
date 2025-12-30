@@ -121,7 +121,7 @@ module datapath
     logic completed_hazard_rs1, completed_hazard_rs2;
     bus32_t result_hazard_rs1, result_hazard_rs2;
 
-    logic stall_from_exe;
+    logic stall_from_exe, stall_from_mem;
 
     logic solved_hazard_rs1, solved_hazard_rs2;
     logic solved_hazard;
@@ -166,7 +166,7 @@ module datapath
         end
     end
 
-    assign stall = (hazard_rob & ~solved_hazard) | stall_from_exe | (~valid_fetch) | rob_full;
+    assign stall = (hazard_rob & ~solved_hazard) | stall_from_exe | (~valid_fetch) | rob_full | stall_from_mem;
 
     assign decode_to_exe_d.valid = ~stall & valid_decode;
 
@@ -181,7 +181,7 @@ module datapath
                     decode_to_exe_q <= decode_to_exe_d;
                     //end
             end else begin
-                if (!stall_from_exe) begin
+                if (!stall_from_exe && !stall_from_mem) begin
                     decode_to_exe_q <= NOP_INSTR;
                 end
             end
@@ -205,7 +205,9 @@ module datapath
         if (~rstn_i) begin
             exe_to_mem_q <= '0;
         end else begin
-            exe_to_mem_q <= exe_to_mem_d;
+            if (!stall_from_mem) begin
+                exe_to_mem_q <= exe_to_mem_d;
+            end
         end
     end
 
@@ -217,7 +219,8 @@ module datapath
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .exe_to_mem_i(exe_to_mem_q),
-        .mem_to_wb_o(mem_to_wb_d)
+        .mem_to_wb_o(mem_to_wb_d),
+        .stall_o(stall_from_mem)
     );
 
     always_ff @(negedge rstn_i, posedge clk_i) begin

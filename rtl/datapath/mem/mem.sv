@@ -4,7 +4,8 @@ module mem
     input logic clk_i,
     input logic rstn_i,
     input exe_to_mem_t exe_to_mem_i,
-    output mem_to_wb_t mem_to_wb_o
+    output mem_to_wb_t mem_to_wb_o,
+    output stall_o
 );
 
     bus32_t dcache_data_rd;
@@ -18,10 +19,10 @@ module mem
     logic dmem_rsp_valid;
     logic dmem_rsp_ready;
     bus32_t dmem_rsp_addr;
-    
+
     logic is_mem_access;
-    assign is_mem_access = (exe_to_mem_i.instr.wb_origin == MEM) && exe_to_mem_i.valid;
-    
+    assign is_mem_access = (exe_to_mem_i.instr.wb_origin == MEM || exe_to_mem_i.instr.store_to_mem) && exe_to_mem_i.valid;
+
     logic mem_we;
     assign mem_we = exe_to_mem_i.instr.store_to_mem;
 
@@ -44,7 +45,7 @@ module mem
         .mem_rsp_ready_o(dmem_rsp_ready),
         .mem_rsp_addr_i(dmem_rsp_addr)
     );
-    
+
     dmem_wrapper dmem_wrapper_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
@@ -58,7 +59,7 @@ module mem
         .rsp_mem_addr_o(dmem_rsp_addr),
         .data_line_o(dmem_data_line)
     );
-    
+
     always_ff @(posedge clk_i) begin
         if (exe_to_mem_i.valid && mem_we && exe_to_mem_i.result == 32'h40000000) begin
             if (exe_to_mem_i.data_rs2 == 32'h1) begin
@@ -75,14 +76,16 @@ module mem
             end
         end
     end
-    
+
     assign mem_to_wb_o.instr = exe_to_mem_i.instr;
-    assign mem_to_wb_o.valid = exe_to_mem_i.valid && 
-                              ((exe_to_mem_i.instr.wb_origin != MEM) || dcache_ready);
+    assign mem_to_wb_o.valid = exe_to_mem_i.valid &&
+                              (((exe_to_mem_i.instr.wb_origin != MEM) && !exe_to_mem_i.instr.store_to_mem) || dcache_ready);
     assign mem_to_wb_o.branch_taken = exe_to_mem_i.branch_taken;
-    assign mem_to_wb_o.branched_pc = (exe_to_mem_i.branch_taken == 1'b1) ? 
+    assign mem_to_wb_o.branched_pc = (exe_to_mem_i.branch_taken == 1'b1) ?
                                     exe_to_mem_i.result : '0;
-    
+
+    assign stall_o = !dcache_ready;
+
     always_comb begin
         case (exe_to_mem_i.instr.wb_origin)
             ALU: begin
@@ -101,4 +104,3 @@ module mem
     end
 
 endmodule
-

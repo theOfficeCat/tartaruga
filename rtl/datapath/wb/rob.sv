@@ -82,7 +82,7 @@ module rob
         end
 
         // Update from wb
-        if (valid_wb_i) begin
+        if (valid_wb_i && rob_q[rob_entry_commit_i].valid) begin
             rob_d[rob_entry_commit_i].completed    = 1'b1;
             rob_d[rob_entry_commit_i].result       = result_i;
             rob_d[rob_entry_commit_i].new_pc       = new_pc_i;

@@ -21,7 +21,7 @@ module imem_wrapper
     output logic     rsp_valid_o,
     input  logic     rsp_ready_i,
     output bus32_t   rsp_mem_addr_o,
-    output bus32_t   instr_o
+    output logic [127:0] instr_line_o
 );
 
     bus32_t imem [IMEM_POS-1:0];
@@ -34,7 +34,7 @@ module imem_wrapper
 
     localparam int LAT = 5;
 
-    bus32_t data_pipe  [LAT-1:0];
+    logic [127:0] data_pipe [LAT-1:0];
     logic   valid_pipe [LAT-1:0];
     bus32_t rsp_mem_addr_pipe [LAT-1:0];
 
@@ -47,7 +47,7 @@ module imem_wrapper
         end
     end
 
-    assign instr_o     = data_pipe[LAT-1];
+    assign instr_line_o     = data_pipe[LAT-1];
     assign rsp_valid_o = valid_pipe[LAT-1];
     assign rsp_mem_addr_o = rsp_mem_addr_pipe[LAT-1];
 
@@ -73,7 +73,13 @@ module imem_wrapper
             end
 
             if (req_valid_i && req_ready_o) begin
-                data_pipe[0]  <= imem[(pc_i >> 2) & 32'hFFF];
+                automatic int base_idx = (pc_i >> 2) & 32'hFFF;
+                data_pipe[0] <= {
+                    imem[(base_idx + 3) & 32'hFFF],
+                    imem[(base_idx + 2) & 32'hFFF],
+                    imem[(base_idx + 1) & 32'hFFF],
+                    imem[base_idx]
+                };
                 valid_pipe[0] <= 1'b1;
                 rsp_mem_addr_pipe[0] <= pc_i;
             end

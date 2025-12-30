@@ -28,7 +28,7 @@ module fetch
     assign pc_o = pc_q;
 
     bus32_t        mem_pc;
-    instruction_t mem_instr;
+    logic [127:0]  mem_instr_line;
 
     logic       req_valid;
     logic       req_ready;
@@ -45,7 +45,7 @@ module fetch
         .mem_pc_o(mem_pc),
         .req_valid_o(req_valid),
         .req_ready_i(req_ready),
-        .mem_instr_i(mem_instr),
+        .mem_instr_line_i(mem_instr_line),
         .rsp_valid_i(rsp_valid),
         .rsp_ready_o(rsp_ready),
         .rsp_mem_addr_i(rsp_mem_addr),
@@ -63,7 +63,7 @@ module fetch
         .rsp_valid_o(rsp_valid),
         .rsp_ready_i(rsp_ready),
         .rsp_mem_addr_o(rsp_mem_addr),
-        .instr_o(mem_instr)
+        .instr_line_o(mem_instr_line)
     );
 
 endmodule

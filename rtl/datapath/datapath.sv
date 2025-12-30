@@ -9,7 +9,8 @@ module datapath
     import riscv_pkg::*;
 (
     input logic clk_i,
-    input logic rstn_i
+    input logic rstn_i,
+    output logic commit_valid_o
 );
     logic commit_valid;
     bus32_t commit_pc;
@@ -293,5 +294,7 @@ module datapath
         valid_wb  = mem_to_wb_q.valid;
         pc_wb     = mem_to_wb_q.instr.pc;
     end
+
+    assign commit_valid_o = commit_valid;
 
 endmodule

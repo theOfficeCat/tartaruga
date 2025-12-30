@@ -77,7 +77,7 @@ module exe
         .taken_o(taken_branch)
     );
 
-    assign exe_to_mem_o.branch_taken = taken_branch & exe_pipe_d[MAX_EXE_STAGES-1].valid;
+    assign exe_to_mem_o.branch_taken = taken_branch & (exe_pipe_d[MAX_EXE_STAGES-1].instr.jump_kind != BNONE) & exe_pipe_d[MAX_EXE_STAGES-1].valid;
     assign exe_to_mem_o.instr = exe_pipe_d[MAX_EXE_STAGES-1].instr;
     assign exe_to_mem_o.valid = exe_pipe_d[MAX_EXE_STAGES-1].valid;
     assign exe_to_mem_o.data_rs2 = exe_pipe_d[MAX_EXE_STAGES-1].data_rs2;

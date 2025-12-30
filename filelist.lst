@@ -17,6 +17,7 @@ rtl/datapath/exe/mul.sv
 rtl/datapath/exe/branch.sv
 
 rtl/datapath/mem/mem.sv
-rtl/datapath/mem/dummy_dmem.sv
+rtl/caches/dcache.sv
+rtl/caches/dmem_wrapper.sv
 
 rtl/datapath/wb/rob.sv

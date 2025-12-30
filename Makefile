@@ -10,7 +10,7 @@ VERILATOR ?= verilator
 TOP        ?= top    # nombre del top-level module (sin prefijos)
 FILELIST   ?= filelist.lst
 BUILD_DIR  ?= obj_dir
-SIM_MAIN   ?= simulator/sim_main.cpp simulator/i_mem.cpp simulator/commit_log.cpp
+SIM_MAIN   ?= simulator/sim_main.cpp simulator/i_mem.cpp simulator/d_mem.cpp simulator/commit_log.cpp
 
 CXXFLAGS  ?= -std=c++17 -O2
 VERILATOR_FLAGS ?= --cc --exe --trace-fst --trace-structs --trace-depth 99 -Wall -Wno-UNUSED -Wno-WIDTH -MMD --assert

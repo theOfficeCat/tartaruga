@@ -195,7 +195,7 @@ package tartaruga_pkg;
     } mem_to_wb_t;
 
     parameter EXE_STAGES_DEFAULT = 1;
-    parameter EXE_STAGES_MULT = 4;
+    parameter EXE_STAGES_MULT = 5;
     parameter MAX_EXE_STAGES = (EXE_STAGES_DEFAULT > EXE_STAGES_MULT) ? EXE_STAGES_DEFAULT : EXE_STAGES_MULT;
 
     localparam decode_to_exe_t NOP_INSTR = '{

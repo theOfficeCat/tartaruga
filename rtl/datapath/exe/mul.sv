@@ -8,35 +8,26 @@ module mul
     output bus32_t data_rd_o
 );
 
-    bus32_t data_rd_0, data_rd_1, data_rd_2, data_rd_3;
+    bus32_t result;
 
-    assign data_rd_0 = data_rs1_i*data_rs2_i;
+    assign result = data_rs1_i*data_rs2_i;
 
-    always_ff @(posedge clk_i, negedge rstn_i) begin
+    // 5 cycles delay
+
+
+    bus32_t [EXE_STAGES_MULT-2:0] delay;
+
+    always_ff @(negedge rstn_i, posedge clk_i) begin
         if (~rstn_i) begin
-            data_rd_1 <= '0;
+            delay <= '0;
         end else begin
-            data_rd_1 <= data_rd_0;
+            delay[0] <= result;
+            for (int i = 1; i < EXE_STAGES_MULT-1; i++) begin
+                delay[i] <= delay[i-1];
+            end
         end
     end
 
-    always_ff @(posedge clk_i, negedge rstn_i) begin
-        if (~rstn_i) begin
-            data_rd_2 <= '0;
-        end else begin
-            data_rd_2 <= data_rd_1;
-        end
-    end
-
-    always_ff @(posedge clk_i, negedge rstn_i) begin
-        if (~rstn_i) begin
-            data_rd_3 <= '0;
-        end else begin
-            data_rd_3 <= data_rd_2;
-        end
-    end
-
-    assign data_rd_o = data_rd_3;
+    assign data_rd_o = delay[EXE_STAGES_MULT-2];
 
 endmodule
-

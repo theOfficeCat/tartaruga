@@ -56,12 +56,19 @@ int main(int argc, char **argv) {
     // Bucle principal de simulación
     //const uint64_t max_cycles = 10000; // límite de seguridad
     //for (uint64_t cycle = 0; cycle < max_cycles && !Verilated::gotFinish(); ++cycle) {
-    while (!Verilated::gotFinish()) {
+    uint32_t cycles_without_commit = 0;
+    while (!Verilated::gotFinish() && cycles_without_commit <= 100) {
         // clock negativo
         top->clk_i = 0;
         top->eval();
         if (gen_trace) tfp->dump(main_time);
         main_time++;
+
+        if (top->commit_valid_o == 1) {
+            cycles_without_commit = 0;
+        } else {
+            cycles_without_commit++;
+        }
 
         // clock positivo
         top->clk_i = 1;
@@ -76,6 +83,10 @@ int main(int argc, char **argv) {
 
     std::cout << "[sim] Finished at cycle " << main_time/2 << std::endl;
 
+    if (cycles_without_commit >= 100) {
+        std::cout << "[sim] Execution killed for more than 100 cycles without commiting instructions" << std::endl;
+    }
+
     // Cierra traza y limpia
     if (gen_trace) {
         tfp->close();
@@ -88,4 +99,3 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-

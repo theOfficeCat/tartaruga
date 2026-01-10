@@ -23,6 +23,7 @@ module rob
     input bus32_t        result_i,
     input bus32_t        new_pc_i,
     input logic          branch_taken_i,
+    input int            kanata_id_i,
 
     // Commit output
     output logic         commit_valid_o,
@@ -34,6 +35,7 @@ module rob
     output logic         commit_store_to_mem_o,
     output bus32_t       commit_new_pc_o,
     output logic         commit_branch_taken_o,
+    output int           commit_kanata_id_o,
 
     output logic         rob_full_o,
 
@@ -75,6 +77,7 @@ module rob
             rob_d[tail_ptr_q].write_enable  = write_enable_i;
             rob_d[tail_ptr_q].store_to_mem  = store_to_mem_i;
             rob_d[tail_ptr_q].completed     = 1'b0; // Just in case a previous moment it was completed and flushed
+            rob_d[tail_ptr_q].kanata_id     = kanata_id_i;
 
             tail_ptr_d = (tail_ptr_q + 1) % ROB_SIZE;
         end else begin
@@ -100,6 +103,7 @@ module rob
             commit_store_to_mem_o    = rob_q[head_ptr_q].store_to_mem;
             commit_new_pc_o          = rob_q[head_ptr_q].new_pc;
             commit_branch_taken_o    = rob_q[head_ptr_q].branch_taken;
+            commit_kanata_id_o       = rob_q[head_ptr_q].kanata_id;
             rob_d[head_ptr_q].valid    = 1'b0; // Mark entry as free
 
             head_ptr_d               = (head_ptr_q + 1) % ROB_SIZE;
@@ -113,6 +117,7 @@ module rob
             commit_store_to_mem_o = 1'b0;
             commit_new_pc_o = '0;
             commit_branch_taken_o = 1'b0;
+            commit_kanata_id_o = 0;
 
             head_ptr_d = head_ptr_q;
         end
@@ -188,6 +193,7 @@ module rob
                 rob_q[i].result     <= '0;
                 rob_q[i].new_pc     <= '0;
                 rob_q[i].branch_taken <= 1'b0;
+                rob_q[i].kanata_id  <= 0;
             end
         end else begin
             head_ptr_q <= head_ptr_d;

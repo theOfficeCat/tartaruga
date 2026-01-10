@@ -8,3 +8,4 @@ tests/*.out
 assembled_tests/*
 tmp_file
 rtl/**/*.surf.ron
+kanata_dbg.log

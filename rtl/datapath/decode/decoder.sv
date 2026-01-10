@@ -5,6 +5,7 @@ module decoder
     input bus32_t pc_i,
     input instruction_t instr_i,
     input rob_idx_t rob_idx_i,
+    input int id_decode_i,
     output instr_data_t instr_decoded_o
 );
 
@@ -21,6 +22,7 @@ module decoder
         instr_decoded_o.exe_stages = 3'b1;
         instr_decoded_o.is_mul = 1'b0;
         instr_decoded_o.rob_idx = rob_idx_i;
+        instr_decoded_o.kanata_id = id_decode_i;
 
         case (instr_i.rtype.opcode)
             OP_ALU_I: begin

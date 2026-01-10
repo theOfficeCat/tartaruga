@@ -142,6 +142,8 @@ package tartaruga_pkg;
         bus32_t result;
         bus32_t new_pc;
         logic branch_taken;
+
+        int kanata_id;
     } rob_entry_t;
 
     typedef struct packed {
@@ -166,6 +168,8 @@ package tartaruga_pkg;
         logic is_mul;
 
         rob_idx_t rob_idx;
+
+        int kanata_id;
     } instr_data_t;
 
     typedef struct packed {
@@ -214,7 +218,8 @@ package tartaruga_pkg;
             jump_kind:     BNONE,
             exe_stages:    3'b1,
             is_mul:        1'b0,
-            rob_idx:       '0
+            rob_idx:       '0,
+            kanata_id:     '0
         },
         valid:     1'b0,
         data_rs1:  '0,

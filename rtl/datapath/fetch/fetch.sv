@@ -8,8 +8,10 @@ module fetch
     input logic stall_i,
     output bus32_t pc_o,
     output instruction_t instr_o,
-    output logic valid_o
+    output logic valid_o,
+    output int kanata_id_o
 );
+    int kanata_id_counter;
 
     // PC logic
     bus32_t pc_d, pc_q;
@@ -17,11 +19,18 @@ module fetch
     always_ff @(posedge clk_i, negedge rstn_i) begin
         if (~rstn_i) begin
             pc_q <= 32'h80000000; // this makes easier to check AUIPC
+            kanata_id_counter <= 0;
         end
         else if (~stall_i || taken_branch_i) begin
             pc_q <= pc_d;
+
+            if (~stall_i && ~taken_branch_i) begin
+                kanata_id_counter <= kanata_id_counter + 1;
+            end
         end
     end
+
+    assign kanata_id_o = kanata_id_counter;
 
     assign pc_d = (taken_branch_i == 1'b1) ? new_pc_i : pc_q + 4;
 

@@ -9,6 +9,9 @@ extern "C" bool load_data(const char* path);
 extern "C" void init_commit(std::string path);
 extern "C" void close_commit();
 
+extern "C" void init_kanata(std::string path);
+extern "C" void close_kanata();
+
 vluint64_t main_time = 0;
 double sc_time_stamp() { return main_time; }
 
@@ -24,6 +27,7 @@ int main(int argc, char **argv) {
 
     load_data(argv[1]);
     init_commit(std::string(argv[1]) + std::string(".commit"));
+    init_kanata(std::string(argv[1]) + std::string(".kanata"));
 
     Verilated::traceEverOn(true); // activa trazas globales antes del eval
 
@@ -96,6 +100,7 @@ int main(int argc, char **argv) {
     delete top;
 
     close_commit();
+    close_kanata();
 
     return 0;
 }

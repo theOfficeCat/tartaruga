@@ -4,6 +4,27 @@ import "DPI-C" function void print_commit(
     input int result
 );
 
+import "DPI-C" function void print_kanata(
+    input logic valid_fetch,
+    input logic valid_decode,
+    input logic valid_exe,
+    input logic valid_mem,
+    input logic valid_wb,
+    input logic valid_commit,
+
+    input int id_fetch,
+    input int id_decode,
+    input int id_exe,
+    input int id_mem,
+    input int id_wb,
+    input int id_commit,
+
+    input int pc_decode,
+    input int instr_decode,
+
+    input logic flush
+);
+
 module datapath
     import tartaruga_pkg::*;
     import riscv_pkg::*;
@@ -21,6 +42,7 @@ module datapath
     logic commit_store_to_mem;
     bus32_t commit_new_pc;
     logic commit_branch_taken;
+    int commit_kanata_id;
 
     logic rob_full;
 
@@ -33,6 +55,8 @@ module datapath
 
     assign stall_fetch = stall;
 
+    int id_fetch, id_decode, id_exe, id_mem, id_wb;
+
     // Fetch
     fetch fetch_inst (
         .clk_i(clk_i),
@@ -42,7 +66,8 @@ module datapath
         .stall_i(stall_fetch),
         .pc_o(pc_fetch),
         .instr_o(instruction_d),
-        .valid_o(valid_fetch)
+        .valid_o(valid_fetch),
+        .kanata_id_o(id_fetch)
     );
 /*
     always_ff @(negedge rstn_i, posedge clk_i) begin
@@ -60,6 +85,7 @@ module datapath
             instruction_q <= '0;
             pc_decode <= '0;
             valid_decode <= 1'b0;
+            id_decode <= '0;
         //end else if (exe_to_mem_d.branch_taken == 1'b1 ||
             //         mem_to_wb_d.branch_taken == 1'b1 ||
             //         mem_to_wb_q.branch_taken == 1'b1) begin
@@ -71,10 +97,12 @@ module datapath
                 instruction_q <= instruction_d; // captura nueva instrucción
                 pc_decode <= pc_fetch;
                 valid_decode <= valid_fetch;
+                id_decode <= id_fetch;
             end else begin
                 instruction_q <= instruction_q; // hold
                 pc_decode <= pc_decode;         // hold
                 valid_decode <= valid_decode;
+                id_decode <= id_decode;
             end
         end
     end
@@ -90,6 +118,7 @@ module datapath
         .pc_i(pc_decode),
         .instr_i(instruction_q),
         .rob_idx_i(rob_entry_decode),
+        .id_decode_i(id_decode),
         .instr_decoded_o(decode_to_exe_d.instr)
     );
 
@@ -241,6 +270,7 @@ module datapath
         .rd_addr_i(decode_to_exe_d.instr.addr_rd),
         .write_enable_i(decode_to_exe_d.instr.write_enable),
         .store_to_mem_i(decode_to_exe_d.instr.store_to_mem),
+        .kanata_id_i(decode_to_exe_d.instr.kanata_id),
 
         .rob_entry_alloc_o(rob_entry_decode),
 
@@ -259,6 +289,7 @@ module datapath
         .commit_store_to_mem_o(commit_store_to_mem),
         .commit_new_pc_o(commit_new_pc),
         .commit_branch_taken_o(commit_branch_taken),
+        .commit_kanata_id_o(commit_kanata_id),
 
         .rob_full_o(rob_full),
 
@@ -285,17 +316,42 @@ module datapath
                 commit_result
             );
         end
+        print_kanata(
+            valid_fetch,
+            valid_decode,
+            valid_exe,
+            valid_mem,
+            valid_wb,
+            commit_valid,
+
+            id_fetch,
+            id_decode,
+            id_exe,
+            id_mem,
+            id_wb,
+            commit_kanata_id,
+
+            pc_decode,
+            decode_to_exe_d.instr.instr.instruction,
+
+            commit_branch_taken
+        );
     end
 
     always_comb begin
         valid_exe = decode_to_exe_q.valid;
         pc_exe    = decode_to_exe_q.instr.pc;
+        id_exe    = decode_to_exe_q.instr.kanata_id;
 
         valid_mem = exe_to_mem_q.valid;
         pc_mem    = exe_to_mem_q.instr.pc;
+        id_mem    = exe_to_mem_q.instr.kanata_id;
 
         valid_wb  = mem_to_wb_q.valid;
         pc_wb     = mem_to_wb_q.instr.pc;
+        id_wb     = mem_to_wb_q.instr.kanata_id;
+
+
     end
 
     assign commit_valid_o = commit_valid;

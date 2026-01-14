@@ -61,6 +61,8 @@ int main(int argc, char **argv) {
     //const uint64_t max_cycles = 10000; // límite de seguridad
     //for (uint64_t cycle = 0; cycle < max_cycles && !Verilated::gotFinish(); ++cycle) {
     uint32_t cycles_without_commit = 0;
+    uint32_t total_cycles = 0;
+    uint32_t commited_instructions = 0;
     while (!Verilated::gotFinish() && cycles_without_commit <= 100) {
         // clock negativo
         top->clk_i = 0;
@@ -68,8 +70,10 @@ int main(int argc, char **argv) {
         if (gen_trace) tfp->dump(main_time);
         main_time++;
 
+        total_cycles++;
         if (top->commit_valid_o == 1) {
             cycles_without_commit = 0;
+            commited_instructions++;
         } else {
             cycles_without_commit++;
         }
@@ -86,6 +90,11 @@ int main(int argc, char **argv) {
     }
 
     std::cout << "[sim] Finished at cycle " << main_time/2 << std::endl;
+
+    std::cout << "[sim] Total cycles: " << total_cycles << std::endl;
+    std::cout << "[sim] Committed instructions: " << commited_instructions << std::endl;
+    std::cout << "[sim] IPC: " << (double)commited_instructions / total_cycles << std::endl;
+    std::cout << "[sim] CPI: " << (double)total_cycles / commited_instructions << std::endl;
 
     if (cycles_without_commit >= 100) {
         std::cout << "[sim] Execution killed for more than 100 cycles without commiting instructions" << std::endl;

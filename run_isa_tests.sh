@@ -19,10 +19,15 @@ failed_tests=()  # array para guardar los fallidos
 for test in assembled_tests/rv32u*-p-*;
 do
     supported=1
+
+    # Extrae la instrucción (parte después del último '-')
+    instr="${test##*-}"
+
     for unsup in "${unsupported[@]}";
     do
-        if (echo $test | grep -Eq $unsup); then
+        if [ "$instr" = "$unsup" ]; then
             supported=0
+            break
         fi
     done
 

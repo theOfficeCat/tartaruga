@@ -10,6 +10,7 @@ rtl/caches/icache.sv
 rtl/datapath/decode/decoder.sv
 rtl/datapath/decode/regfile.sv
 rtl/datapath/decode/immediate.sv
+rtl/datapath/decode/csr.sv
 
 rtl/datapath/exe/exe.sv
 rtl/datapath/exe/alu.sv

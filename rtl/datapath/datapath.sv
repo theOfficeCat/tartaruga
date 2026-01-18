@@ -45,6 +45,8 @@ module datapath
     int commit_kanata_id;
     store_buffer_idx_t commit_store_buffer_idx;
     logic [STORE_BUFFER_SIZE-1:0] discard_store_buffer;
+    logic commit_xcpt;
+    xcpt_code_t commit_xcpt_code;
 
     logic rob_full;
 
@@ -59,6 +61,8 @@ module datapath
 
     int id_fetch, id_decode, id_exe, id_mem, id_wb;
 
+    logic fetch_missaligned;
+
     // Fetch
     fetch fetch_inst (
         .clk_i(clk_i),
@@ -69,7 +73,8 @@ module datapath
         .pc_o(pc_fetch),
         .instr_o(instruction_d),
         .valid_o(valid_fetch),
-        .kanata_id_o(id_fetch)
+        .kanata_id_o(id_fetch),
+        .xcpt_missaligned_o(fetch_missaligned)
     );
 /*
     always_ff @(negedge rstn_i, posedge clk_i) begin
@@ -82,12 +87,22 @@ module datapath
         end
     end
 */
+    logic xcpt_fetch, xcpt_decode;
+    xcpt_code_t xcpt_code_fetch, xcpt_code_decode;
+
+    always_comb begin
+        xcpt_fetch = fetch_missaligned;
+        xcpt_code_fetch = XCPT_INSTR_ADDR_MISALIGNED;
+    end
+
     always_ff @(negedge rstn_i, posedge clk_i) begin
         if (~rstn_i || commit_branch_taken) begin
             instruction_q <= '0;
             pc_decode <= '0;
             valid_decode <= 1'b0;
             id_decode <= '0;
+            xcpt_decode <= 1'b0;
+            xcpt_code_decode <= XCPT_ILLEGAL_INSTR;
         //end else if (exe_to_mem_d.branch_taken == 1'b1 ||
             //         mem_to_wb_d.branch_taken == 1'b1 ||
             //         mem_to_wb_q.branch_taken == 1'b1) begin
@@ -100,11 +115,15 @@ module datapath
                 pc_decode <= pc_fetch;
                 valid_decode <= valid_fetch;
                 id_decode <= id_fetch;
+                xcpt_decode <= xcpt_fetch;
+                xcpt_code_decode <= xcpt_code_fetch;
             end else begin
                 instruction_q <= instruction_q; // hold
                 pc_decode <= pc_decode;         // hold
                 valid_decode <= valid_decode;
                 id_decode <= id_decode;
+                xcpt_decode <= xcpt_decode;
+                xcpt_code_decode <= xcpt_code_decode;
             end
         end
     end
@@ -121,6 +140,8 @@ module datapath
         .instr_i(instruction_q),
         .rob_idx_i(rob_entry_decode),
         .id_decode_i(id_decode),
+        .xcpt_i(xcpt_decode),
+        .xcpt_code_i(xcpt_code_decode),
         .instr_decoded_o(decode_to_exe_d.instr)
     );
 
@@ -139,6 +160,24 @@ module datapath
         .write_enable_i(commit_write_enable),
         .data_rs1_o(regfile_rs1_data),
         .data_rs2_o(regfile_rs2_data)
+    );
+
+    csr csr_inst (
+        .clk_i(clk_i),
+        .rstn_i(rstn_i),
+
+        .csr_read_i(),
+        .csr_write_i(),
+        .csr_addr_i(),
+        .csr_write_data_i(),
+
+        .xcpt_i(commit_xcpt),
+        .xcpt_code_i(commit_xcpt_code),
+        .xcpt_pc_i(commit_pc),
+        .xcpt_value_i(),
+
+        .csr_read_valid_o(),
+        .csr_read_data_o()
     );
 
     logic stall;
@@ -292,6 +331,8 @@ module datapath
 
         .check_alive_i(check_alive),
         .still_alive_o(still_alive),
+        .xcpt_i(mem_to_wb_q.instr.xcpt),
+        .xcpt_code_i(mem_to_wb_q.instr.xcpt_code),
 
         .commit_valid_o(commit_valid),
         .commit_pc_o(commit_pc),
@@ -305,6 +346,8 @@ module datapath
         .commit_kanata_id_o(commit_kanata_id),
         .commit_store_buffer_idx_o(commit_store_buffer_idx),
         .discard_store_buffer_o(discard_store_buffer),
+        .commit_xcpt_o(commit_xcpt),
+        .commit_xcpt_code_o(commit_xcpt_code),
 
         .rob_full_o(rob_full),
 

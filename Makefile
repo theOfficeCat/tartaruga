@@ -13,7 +13,7 @@ BUILD_DIR  ?= obj_dir
 SIM_MAIN   ?= simulator/sim_main.cpp simulator/commit_log.cpp simulator/kanata.cpp simulator/elf_reader.cpp simulator/unified_mem.cpp
 
 CXXFLAGS  ?= -std=c++17 -O2
-VERILATOR_FLAGS ?= --cc --exe --trace-fst --trace-structs --trace-depth 99 -Wall -Wno-UNUSED -Wno-WIDTH -MMD --assert
+VERILATOR_FLAGS ?= --cc --exe --trace-fst --trace-structs --trace-depth 99 -Wall -Wno-UNUSED -Wno-WIDTH -Wno-PINCONNECTEMPTY -MMD --assert
 # Añade includes si hace falta, por ejemplo: CPPFLAGS += -I../rtl/include
 
 # --- lectura de filelist: ignora comentarios y líneas vacías ---

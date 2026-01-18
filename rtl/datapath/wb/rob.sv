@@ -14,6 +14,7 @@ module rob
     input reg_addr_t     rd_addr_i,
     input logic          write_enable_i,
     input logic          store_to_mem_i,
+    input int            kanata_id_i,
 
     output rob_idx_t     rob_entry_alloc_o,
 
@@ -23,11 +24,13 @@ module rob
     input bus32_t        result_i,
     input bus32_t        new_pc_i,
     input logic          branch_taken_i,
-    input int            kanata_id_i,
     input store_buffer_idx_t store_buffer_idx_i,
 
     input rob_idx_t      check_alive_i,
     output logic         still_alive_o,
+
+    input logic          xcpt_i,
+    input xcpt_code_t    xcpt_code_i,
 
     // Commit output
     output logic         commit_valid_o,
@@ -42,6 +45,8 @@ module rob
     output int           commit_kanata_id_o,
     output store_buffer_idx_t commit_store_buffer_idx_o,
     output logic[STORE_BUFFER_SIZE-1:0] discard_store_buffer_o,
+    output logic         commit_xcpt_o,
+    output xcpt_code_t   commit_xcpt_code_o,
 
     output logic         rob_full_o,
 
@@ -94,9 +99,11 @@ module rob
         if (valid_wb_i && rob_q[rob_entry_commit_i].valid) begin
             rob_d[rob_entry_commit_i].completed    = 1'b1;
             rob_d[rob_entry_commit_i].result       = result_i;
-            rob_d[rob_entry_commit_i].new_pc       = new_pc_i;
-            rob_d[rob_entry_commit_i].branch_taken = branch_taken_i;
             rob_d[rob_entry_commit_i].store_buffer_idx = store_buffer_idx_i;
+            rob_d[rob_entry_commit_i].new_pc       = (xcpt_i == 1'b1) ? ADDR_XCPT : new_pc_i;
+            rob_d[rob_entry_commit_i].branch_taken = (xcpt_i == 1'b1) ? 1'b1 : branch_taken_i;
+            rob_d[rob_entry_commit_i].xcpt        = xcpt_i;
+            rob_d[rob_entry_commit_i].xcpt_code   = xcpt_code_i;
         end
 
         // Commit logic
@@ -112,6 +119,8 @@ module rob
             commit_branch_taken_o    = rob_q[head_ptr_q].branch_taken;
             commit_kanata_id_o       = rob_q[head_ptr_q].kanata_id;
             commit_store_buffer_idx_o = rob_q[head_ptr_q].store_buffer_idx;
+            commit_xcpt_o            = rob_q[head_ptr_q].xcpt;
+            commit_xcpt_code_o       = rob_q[head_ptr_q].xcpt_code;
             rob_d[head_ptr_q].valid    = 1'b0; // Mark entry as free
 
             head_ptr_d               = (head_ptr_q + 1) % ROB_SIZE;
@@ -127,6 +136,8 @@ module rob
             commit_branch_taken_o = 1'b0;
             commit_kanata_id_o = 0;
             commit_store_buffer_idx_o = '0;
+            commit_xcpt_o = 1'b0;
+            commit_xcpt_code_o = XCPT_ILLEGAL_INSTR;
 
             head_ptr_d = head_ptr_q;
         end
@@ -209,6 +220,8 @@ module rob
                 rob_q[i].new_pc     <= '0;
                 rob_q[i].branch_taken <= 1'b0;
                 rob_q[i].kanata_id  <= 0;
+                rob_q[i].xcpt      <= 1'b0;
+                rob_q[i].xcpt_code <= XCPT_ILLEGAL_INSTR;
             end
         end else begin
             head_ptr_q <= head_ptr_d;

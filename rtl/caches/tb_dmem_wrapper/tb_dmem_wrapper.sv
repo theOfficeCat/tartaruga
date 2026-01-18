@@ -15,7 +15,7 @@ module tb_dmem_wrapper;
     bus32_t     rsp_mem_addr_o;
     logic [127:0] data_line_o;
 
-    dmem_wrapper imem_wrapper (
+    dmem_wrapper dmem_wrapper (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .req_valid_i(req_valid_i),

@@ -10,7 +10,7 @@ rm assembled_tests/*.dump
 rm -rf to_run
 mkdir to_run
 
-unsupported=( "fence_i" "jalr" "lb" "lbu" "lh" "lhu" "ma_data" "sb" "sh" "ld_st"  "div" "divu" "rem" "remu" )
+unsupported=( "fence_i" "jalr" "lb" "lbu" "lh" "lhu" "ma_data" "sb" "sh" "ld_st" "div" "divu" "rem" "remu" )
 
 for test in assembled_tests/rv32u*-p-*;
 do

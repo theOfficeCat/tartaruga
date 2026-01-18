@@ -9,7 +9,8 @@ module fetch
     output bus32_t pc_o,
     output instruction_t instr_o,
     output logic valid_o,
-    output int kanata_id_o
+    output int kanata_id_o,
+    output logic xcpt_missaligned_o
 );
     int kanata_id_counter;
 
@@ -74,5 +75,14 @@ module fetch
         .rsp_mem_addr_o(rsp_mem_addr),
         .instr_line_o(mem_instr_line)
     );
+
+    always_comb begin
+        if (pc_q[1:0] != 2'b00) begin
+            xcpt_missaligned_o = 1'b1;
+        end
+        else begin
+            xcpt_missaligned_o = 1'b0;
+        end
+    end
 
 endmodule

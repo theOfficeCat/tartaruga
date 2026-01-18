@@ -49,4 +49,10 @@ package riscv_pkg;
     // We can reuse the one for the ALU without immediate
 
     bus32_t NOP_INSTR_HEX = 32'h00000033;
+
+    typedef enum logic [11:0] {
+        CSR_MEPCT_ADDR  = 12'h341,
+        CSR_MCAUSE_ADDR = 12'h342
+    } csr_addr_t;
+
 endpackage

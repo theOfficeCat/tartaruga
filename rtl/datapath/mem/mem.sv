@@ -70,6 +70,10 @@ module mem
                 $display("Execution failed at PC 0x%h", exe_to_mem_i.instr.pc);
                 $finish();
             end
+            else if (exe_to_mem_i.data_rs2 == 32'h3) begin
+                $display("Finishing because exception");
+                $finish();
+            end
             else begin
                 $display("Error at PC 0x%h", exe_to_mem_i.instr.pc);
                 $finish();

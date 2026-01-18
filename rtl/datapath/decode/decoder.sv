@@ -6,10 +6,13 @@ module decoder
     input instruction_t instr_i,
     input rob_idx_t rob_idx_i,
     input int id_decode_i,
+    input logic xcpt_i,
+    input xcpt_code_t xcpt_code_i,
     output instr_data_t instr_decoded_o
 );
 
     //assign instr_decoded_o = '0;
+    logic illegal_instr;
 
     always_comb begin
         instr_decoded_o.pc = pc_i;
@@ -23,6 +26,18 @@ module decoder
         instr_decoded_o.is_mul = 1'b0;
         instr_decoded_o.rob_idx = rob_idx_i;
         instr_decoded_o.kanata_id = id_decode_i;
+        instr_decoded_o.xcpt = xcpt_i;
+        instr_decoded_o.xcpt_code = xcpt_code_i;
+
+        instr_decoded_o.write_enable = 1'b0;
+        instr_decoded_o.rs1_or_pc = RS1;
+        instr_decoded_o.rs2_or_imm = RS2;
+        instr_decoded_o.alu_op = ADD;
+        instr_decoded_o.wb_origin = ALU;
+        instr_decoded_o.store_to_mem = 1'b0;
+        instr_decoded_o.jump_kind = BNONE;
+
+        illegal_instr = 1'b0;
 
         case (instr_i.rtype.opcode)
             OP_ALU_I: begin
@@ -58,18 +73,7 @@ module decoder
                                 instr_decoded_o.alu_op = SLL;
                             end
                             default: begin
-                                // illegal instruction treated as NOP being a x0 + x0
-                                // without write
-
-                                instr_decoded_o.write_enable = 1'b0;
-                                instr_decoded_o.rs1_or_pc = RS1;
-                                instr_decoded_o.rs2_or_imm = RS2;
-                                instr_decoded_o.addr_rs1 = '0;
-                                instr_decoded_o.addr_rs2 = '0;
-                                instr_decoded_o.addr_rd = '0;
-                                instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.wb_origin = ALU;
-                                instr_decoded_o.store_to_mem = 1'b0;
+                                illegal_instr = 1'b1;
                             end
                         endcase
                     end
@@ -82,34 +86,12 @@ module decoder
                                 instr_decoded_o.alu_op = SRA;
                             end
                             default: begin
-                                // illegal instruction treated as NOP being a x0 + x0
-                                // without write
-
-                                instr_decoded_o.write_enable = 1'b0;
-                                instr_decoded_o.rs1_or_pc = RS1;
-                                instr_decoded_o.rs2_or_imm = RS2;
-                                instr_decoded_o.addr_rs1 = '0;
-                                instr_decoded_o.addr_rs2 = '0;
-                                instr_decoded_o.addr_rd = '0;
-                                instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.wb_origin = ALU;
-                                instr_decoded_o.store_to_mem = 1'b0;
+                                illegal_instr = 1'b1;
                             end
                         endcase
                     end
                     default: begin
-                        // illegal instruction treated as NOP being a x0 + x0
-                        // without write
-
-                        instr_decoded_o.write_enable = 1'b0;
-                        instr_decoded_o.rs1_or_pc = RS1;
-                        instr_decoded_o.rs2_or_imm = RS2;
-                        instr_decoded_o.addr_rs1 = '0;
-                        instr_decoded_o.addr_rs2 = '0;
-                        instr_decoded_o.addr_rd = '0;
-                        instr_decoded_o.alu_op = ADD;
-                        instr_decoded_o.wb_origin = ALU;
-                        instr_decoded_o.store_to_mem = 1'b0;
+                        illegal_instr = 1'b1;
                     end
                 endcase
             end
@@ -137,18 +119,7 @@ module decoder
                                 instr_decoded_o.exe_stages = EXE_STAGES_MULT;
                             end
                             default: begin
-                                // illegal instruction treated as NOP being a x0 + x0
-                                // without write
-
-                                instr_decoded_o.write_enable = 1'b0;
-                                instr_decoded_o.rs1_or_pc = RS1;
-                                instr_decoded_o.rs2_or_imm = RS2;
-                                instr_decoded_o.addr_rs1 = '0;
-                                instr_decoded_o.addr_rs2 = '0;
-                                instr_decoded_o.addr_rd = '0;
-                                instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.wb_origin = ALU;
-                                instr_decoded_o.store_to_mem = 1'b0;
+                                illegal_instr = 1'b1;
                             end
                         endcase
                     end
@@ -158,18 +129,7 @@ module decoder
                                 instr_decoded_o.alu_op = SLL;
                             end
                             default: begin
-                                // illegal instruction treated as NOP being a x0 + x0
-                                // without write
-
-                                instr_decoded_o.write_enable = 1'b0;
-                                instr_decoded_o.rs1_or_pc = RS1;
-                                instr_decoded_o.rs2_or_imm = RS2;
-                                instr_decoded_o.addr_rs1 = '0;
-                                instr_decoded_o.addr_rs2 = '0;
-                                instr_decoded_o.addr_rd = '0;
-                                instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.wb_origin = ALU;
-                                instr_decoded_o.store_to_mem = 1'b0;
+                                illegal_instr = 1'b1;
                             end
                         endcase
                     end
@@ -179,18 +139,7 @@ module decoder
                                 instr_decoded_o.alu_op = SLT;
                             end
                             default: begin
-                                // illegal instruction treated as NOP being a x0 + x0
-                                // without write
-
-                                instr_decoded_o.write_enable = 1'b0;
-                                instr_decoded_o.rs1_or_pc = RS1;
-                                instr_decoded_o.rs2_or_imm = RS2;
-                                instr_decoded_o.addr_rs1 = '0;
-                                instr_decoded_o.addr_rs2 = '0;
-                                instr_decoded_o.addr_rd = '0;
-                                instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.wb_origin = ALU;
-                                instr_decoded_o.store_to_mem = 1'b0;
+                                illegal_instr = 1'b1;
                             end
                         endcase
                     end
@@ -200,18 +149,7 @@ module decoder
                                 instr_decoded_o.alu_op = SLTU;
                             end
                             default: begin
-                                // illegal instruction treated as NOP being a x0 + x0
-                                // without write
-
-                                instr_decoded_o.write_enable = 1'b0;
-                                instr_decoded_o.rs1_or_pc = RS1;
-                                instr_decoded_o.rs2_or_imm = RS2;
-                                instr_decoded_o.addr_rs1 = '0;
-                                instr_decoded_o.addr_rs2 = '0;
-                                instr_decoded_o.addr_rd = '0;
-                                instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.wb_origin = ALU;
-                                instr_decoded_o.store_to_mem = 1'b0;
+                                illegal_instr = 1'b1;
                             end
                         endcase
                     end
@@ -221,18 +159,7 @@ module decoder
                                 instr_decoded_o.alu_op = XOR;
                             end
                             default: begin
-                                // illegal instruction treated as NOP being a x0 + x0
-                                // without write
-
-                                instr_decoded_o.write_enable = 1'b0;
-                                instr_decoded_o.rs1_or_pc = RS1;
-                                instr_decoded_o.rs2_or_imm = RS2;
-                                instr_decoded_o.addr_rs1 = '0;
-                                instr_decoded_o.addr_rs2 = '0;
-                                instr_decoded_o.addr_rd = '0;
-                                instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.wb_origin = ALU;
-                                instr_decoded_o.store_to_mem = 1'b0;
+                                illegal_instr = 1'b1;
                             end
                         endcase
                     end
@@ -245,18 +172,7 @@ module decoder
                                 instr_decoded_o.alu_op = SRA;
                             end
                             default: begin
-                                // illegal instruction treated as NOP being a x0 + x0
-                                // without write
-
-                                instr_decoded_o.write_enable = 1'b0;
-                                instr_decoded_o.rs1_or_pc = RS1;
-                                instr_decoded_o.rs2_or_imm = RS2;
-                                instr_decoded_o.addr_rs1 = '0;
-                                instr_decoded_o.addr_rs2 = '0;
-                                instr_decoded_o.addr_rd = '0;
-                                instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.wb_origin = ALU;
-                                instr_decoded_o.store_to_mem = 1'b0;
+                                illegal_instr = 1'b1;
                             end
                         endcase
                     end
@@ -266,18 +182,7 @@ module decoder
                                 instr_decoded_o.alu_op = OR;
                             end
                             default: begin
-                                // illegal instruction treated as NOP being a x0 + x0
-                                // without write
-
-                                instr_decoded_o.write_enable = 1'b0;
-                                instr_decoded_o.rs1_or_pc = RS1;
-                                instr_decoded_o.rs2_or_imm = RS2;
-                                instr_decoded_o.addr_rs1 = '0;
-                                instr_decoded_o.addr_rs2 = '0;
-                                instr_decoded_o.addr_rd = '0;
-                                instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.wb_origin = ALU;
-                                instr_decoded_o.store_to_mem = 1'b0;
+                                illegal_instr = 1'b1;
                             end
                         endcase
                     end
@@ -287,34 +192,13 @@ module decoder
                                 instr_decoded_o.alu_op = AND;
                             end
                             default: begin
-                                // illegal instruction treated as NOP being a x0 + x0
-                                // without write
-
-                                instr_decoded_o.write_enable = 1'b0;
-                                instr_decoded_o.rs1_or_pc = RS1;
-                                instr_decoded_o.rs2_or_imm = RS2;
-                                instr_decoded_o.addr_rs1 = '0;
-                                instr_decoded_o.addr_rs2 = '0;
-                                instr_decoded_o.addr_rd = '0;
-                                instr_decoded_o.alu_op = ADD;
-                                instr_decoded_o.wb_origin = ALU;
-                                instr_decoded_o.store_to_mem = 1'b0;
+                                illegal_instr = 1'b1;
                             end
                         endcase
                     end
 
                     default: begin
-                        // illegal instruction treated as NOP being a x0 + x0
-                        // without write
-
-                        instr_decoded_o.write_enable = 1'b0;
-                        instr_decoded_o.rs1_or_pc = RS1;
-                        instr_decoded_o.rs2_or_imm = RS2;
-                        instr_decoded_o.addr_rs1 = '0;
-                        instr_decoded_o.addr_rs2 = '0;
-                        instr_decoded_o.addr_rd = '0;
-                        instr_decoded_o.alu_op = ADD;
-                        instr_decoded_o.store_to_mem = 1'b0;
+                        illegal_instr = 1'b1;
                     end
                 endcase
             end
@@ -406,21 +290,21 @@ module decoder
 
             end
             default: begin
-                // illegal instruction treated as NOP being a x0 + x0
-                // without write
+                illegal_instr = 1'b1;
+            end
+        endcase
 
-                instr_decoded_o.write_enable = 1'b0;
-                instr_decoded_o.rs1_or_pc = RS1;
-                instr_decoded_o.rs2_or_imm = RS2;
+        if (illegal_instr) begin
+            instr_decoded_o.xcpt = 1'b1;
+            if (!(xcpt_code_i == XCPT_INSTR_ADDR_MISALIGNED && xcpt_i == 1'b1)) begin
+                instr_decoded_o.xcpt_code = XCPT_ILLEGAL_INSTR;
+
                 instr_decoded_o.addr_rs1 = '0;
                 instr_decoded_o.addr_rs2 = '0;
                 instr_decoded_o.addr_rd = '0;
-                instr_decoded_o.alu_op = ADD;
-                instr_decoded_o.wb_origin = ALU;
-                instr_decoded_o.store_to_mem = 1'b0;
-                instr_decoded_o.jump_kind = BNONE;
             end
-        endcase
+
+        end
 
         // hardwire source registers to x0 if there is no reading from there
         // to avoid problems with hazard detection

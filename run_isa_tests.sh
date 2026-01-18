@@ -10,22 +10,29 @@ rm assembled_tests/*.dump
 rm -rf to_run
 mkdir to_run
 
-unsupported=( "fence_i" "jalr" "lb" "lbu" "lh" "lhu" "ma_data" "sb" "sh" "ld_st" "mulh" "mulhu" "mulhsu" "div" "divu" "rem" "remu" )
+unsupported=( "fence_i" "jalr" "lb" "lbu" "lh" "lhu" "ma_data" "sb" "sh" "ld_st"  "div" "divu" "rem" "remu" )
 
 for test in assembled_tests/rv32u*-p-*;
 do
     supported=1
+
+    # Extrae la instrucción (parte después del último '-')
+    instr="${test##*-}"
+
     for unsup in "${unsupported[@]}";
     do
-        if (echo $test | grep -Eq $unsup); then
+        if [ "$instr" = "$unsup" ]; then
             supported=0
+            break
         fi
     done
 
     if [ $supported -eq 1 ]; then
-        python3 prepare_program_assembled.py $test to_run/ > /dev/null
+        python3 prepare_program_assembled.py "$test" to_run/ > /dev/null
+        echo "Prepared test: $test"
     fi
 done
+
 
 TESTS=$(ls to_run | wc -l)
 

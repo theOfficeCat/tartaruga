@@ -124,6 +124,12 @@ package tartaruga_pkg;
         // Add types of instructions as structs of 32 bits to ease the decode
     } instruction_t;
 
+    typedef enum logic[5:0] {
+        XCPT_INSTR_ADDR_MISALIGNED = 6'b000000,
+        XCPT_INSTR_ACCESS_FAULT    = 6'b000001,
+        XCPT_ILLEGAL_INSTR         = 6'b000010
+    } xcpt_code_t;
+
     localparam ROB_SIZE = 16;
     localparam ROB_IDX_BITS = $clog2(ROB_SIZE);
 
@@ -144,6 +150,9 @@ package tartaruga_pkg;
         logic branch_taken;
 
         int kanata_id;
+
+        logic xcpt;
+        xcpt_code_t xcpt_code;
     } rob_entry_t;
 
     typedef struct packed {
@@ -170,6 +179,9 @@ package tartaruga_pkg;
         rob_idx_t rob_idx;
 
         int kanata_id;
+
+        logic xcpt;
+        xcpt_code_t xcpt_code;
     } instr_data_t;
 
     typedef struct packed {
@@ -219,7 +231,9 @@ package tartaruga_pkg;
             exe_stages:    3'b1,
             is_mul:        1'b0,
             rob_idx:       '0,
-            kanata_id:     '0
+            kanata_id:     '0,
+            xcpt:          1'b0,
+            xcpt_code:     XCPT_ILLEGAL_INSTR
         },
         valid:     1'b0,
         data_rs1:  '0,
@@ -235,5 +249,7 @@ package tartaruga_pkg;
     );
         return (write_en && (rd != 5'd0) && (rd == rs));
     endfunction
+
+    parameter bus32_t ADDR_XCPT = 32'h00002000;
 
 endpackage

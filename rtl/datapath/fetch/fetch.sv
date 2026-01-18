@@ -18,7 +18,7 @@ module fetch
 
     always_ff @(posedge clk_i, negedge rstn_i) begin
         if (~rstn_i) begin
-            pc_q <= 32'h80000000; // this makes easier to check AUIPC
+            pc_q <= 32'h00000000; // this makes easier to check AUIPC
             kanata_id_counter <= 0;
         end
         else if (~stall_i || taken_branch_i) begin

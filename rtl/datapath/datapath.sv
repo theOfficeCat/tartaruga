@@ -169,7 +169,7 @@ module datapath
                 decode_to_exe_d.data_rs1 = result_hazard_rs1;
                 solved_hazard_rs1 = 1'b1;
             end else begin
-                if (rob_entry_hazard_rs1 == exe_to_mem_d.instr.rob_idx && exe_to_mem_d.valid) begin
+                if (rob_entry_hazard_rs1 == exe_to_mem_d.instr.rob_idx && exe_to_mem_d.valid && exe_to_mem_d.instr.wb_origin != MEM) begin
                     decode_to_exe_d.data_rs1 = exe_to_mem_d.result;
                     solved_hazard_rs1 = 1'b1;
                 end else if (rob_entry_hazard_rs1 == mem_to_wb_d.instr.rob_idx && mem_to_wb_d.valid) begin
@@ -184,7 +184,7 @@ module datapath
                 decode_to_exe_d.data_rs2 = result_hazard_rs2;
                 solved_hazard_rs2 = 1'b1;
             end else begin
-                if (rob_entry_hazard_rs2 == exe_to_mem_d.instr.rob_idx && exe_to_mem_d.valid) begin
+                if (rob_entry_hazard_rs2 == exe_to_mem_d.instr.rob_idx && exe_to_mem_d.valid && exe_to_mem_d.instr.wb_origin != MEM) begin
                     decode_to_exe_d.data_rs2 = exe_to_mem_d.result;
                     solved_hazard_rs2 = 1'b1;
                 end else if (rob_entry_hazard_rs2 == mem_to_wb_d.instr.rob_idx && mem_to_wb_d.valid) begin

@@ -1,13 +1,13 @@
 `ifdef TB
-    function int read_dmem(input int addr);
+    function int read_mem(input int addr);
         return addr;
     endfunction
-    function void write_dmem(input int addr, input int data);
+    function void write_mem(input int addr, input int data);
         $display("Write to addr %h: %h", addr, data);
     endfunction
 `else
-    import "DPI-C" function int read_dmem(input int addr);
-    import "DPI-C" function void write_dmem(input int addr, input int data);
+    import "DPI-C" function int read_mem(input int addr);
+    import "DPI-C" function void write_mem(input int addr, input int data);
 `endif
 
 module dmem_wrapper
@@ -72,25 +72,25 @@ module dmem_wrapper
 
             if (req_valid_i && req_ready_o) begin
                 automatic int base_idx = (addr_i >> 2) & 32'hFFF;
-                
+
                 if (we_i) begin
-                    write_dmem(addr_i, data_wr_i);
-                    
+                    write_mem(addr_i, data_wr_i);
+
                     data_pipe[0] <= {
-                        read_dmem({addr_i[31:4], 4'hC}),
-                        read_dmem({addr_i[31:4], 4'h8}),
-                        read_dmem({addr_i[31:4], 4'h4}),
-                        read_dmem({addr_i[31:4], 4'h0})
+                        read_mem({addr_i[31:4], 4'hC}),
+                        read_mem({addr_i[31:4], 4'h8}),
+                        read_mem({addr_i[31:4], 4'h4}),
+                        read_mem({addr_i[31:4], 4'h0})
                     };
                 end else begin
                     data_pipe[0] <= {
-                        read_dmem({addr_i[31:4], 4'hC}),
-                        read_dmem({addr_i[31:4], 4'h8}),
-                        read_dmem({addr_i[31:4], 4'h4}),
-                        read_dmem({addr_i[31:4], 4'h0})
+                        read_mem({addr_i[31:4], 4'hC}),
+                        read_mem({addr_i[31:4], 4'h8}),
+                        read_mem({addr_i[31:4], 4'h4}),
+                        read_mem({addr_i[31:4], 4'h0})
                     };
                 end
-                
+
                 valid_pipe[0] <= 1'b1;
                 rsp_mem_addr_pipe[0] <= {addr_i[31:4], 4'h0};
                 we_pipe[0] <= we_i;

@@ -26,13 +26,35 @@ module mem
     logic mem_we;
     assign mem_we = exe_to_mem_i.instr.store_to_mem;
 
+    logic sb_full;
+
+    store_buffer store_buffer_inst (
+        .clk_i(clk_i),
+        .rstn_i(rstn_i),
+        .exe_to_mem_i(exe_to_mem_i),
+        .data_i(exe_to_mem_i.data_rs2),
+        .addr_i(exe_to_mem_i.result),
+        .valid_i(exe_to_mem_i.valid && exe_to_mem_i.instr.store_to_mem),
+        .req_valid_o(),
+        .req_ready_i(),
+        .addr_o(dmem_addr),
+        .data_wr_o(dmem_data_wr),
+        .rsp_valid_i(),
+        .rsp_ready_o(),
+        .store_buffer_commit_i(1'b0), // Not used in this design
+        .store_buffer_idx_commit_i('0), // Not used in this design
+        .store_buffer_discard_i(1'b0), // Not used in this design
+        .store_buffer_idx_discard_i('0), // Not used in this design
+        .full_o(sb_full)
+    );
+
     dcache dcache_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
-        .addr_i(exe_to_mem_i.result),
-        .data_wr_i(exe_to_mem_i.data_rs2),
-        .we_i(mem_we),
-        .valid_i(is_mem_access),
+        .addr_i(),
+        .data_wr_i(),
+        .we_i(),
+        .valid_i(),
         .data_rd_o(dcache_data_rd),
         .ready_o(dcache_ready),
         .mem_addr_o(dmem_addr),
@@ -84,7 +106,7 @@ module mem
     assign mem_to_wb_o.branched_pc = (exe_to_mem_i.branch_taken == 1'b1) ?
                                     exe_to_mem_i.result : '0;
 
-    assign stall_o = !dcache_ready;
+    assign stall_o = sb_full;
 
     always_comb begin
         case (exe_to_mem_i.instr.wb_origin)

@@ -12,7 +12,7 @@ rm assembled_tests/*.kanata
 rm -rf to_run
 mkdir to_run
 
-unsupported=( "fence_i" "jalr" "lb" "lbu" "lh" "lhu" "ma_data" "sb" "sh" "mulh" "mulhu" "mulhsu" "div" "divu" "rem" "remu" )
+unsupported=( "fence_i" "lb" "lbu" "lh" "lhu" "ma_data" "sb" "sh" "mulh" "mulhu" "mulhsu" "div" "divu" "rem" "remu" )
 
 failed_tests=()  # array para guardar los fallidos
 

@@ -6,11 +6,15 @@ mkdir assembled_tests
 cp riscv-tests/isa/rv32ui-p* assembled_tests
 cp riscv-tests/isa/rv32um-p* assembled_tests
 rm assembled_tests/*.dump
+rm assembled_tests/*.commit
+rm assembled_tests/*.kanata
 
 rm -rf to_run
 mkdir to_run
 
 unsupported=( "fence_i" "jalr" "lb" "lbu" "lh" "lhu" "ma_data" "sb" "sh" "ld_st" "mulh" "mulhu" "mulhsu" "div" "divu" "rem" "remu" )
+
+failed_tests=()  # array para guardar los fallidos
 
 for test in assembled_tests/rv32u*-p-*;
 do
@@ -23,27 +27,18 @@ do
     done
 
     if [ $supported -eq 1 ]; then
-        python3 prepare_program_assembled.py $test to_run/ > /dev/null
+        tmp_file=$(mktemp)
+        ./run_tartaruga.sh "$test" > "$tmp_file" 2> /dev/null
+
+        if grep -q "Execution succeeded" "$tmp_file"; then
+            echo "✅ test $test succeeded"
+        else
+            echo "❌ test $test failed"
+            failed_tests+=("$test")
+        fi
+
+        rm -f "$tmp_file"
     fi
-done
-
-TESTS=$(ls to_run | wc -l)
-
-failed_tests=()  # array para guardar los fallidos
-
-# Ejecución de los tests
-for test in to_run/*; do
-    tmp_file=$(mktemp)
-    ./run_tartaruga.sh "$test" > "$tmp_file" 2> /dev/null
-
-    if grep -q "Execution succeeded" "$tmp_file"; then
-        echo "✅ test $test succeeded"
-    else
-        echo "❌ test $test failed"
-        failed_tests+=("$test")
-    fi
-
-    rm -f "$tmp_file"
 done
 
 # Reporte final

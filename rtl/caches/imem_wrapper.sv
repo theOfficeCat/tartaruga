@@ -1,11 +1,11 @@
-`ifdef TB
+/*`ifdef TB
     function int read_mem(input int pc);
         return pc + 32'h1000;
     endfunction
 `else
     import "DPI-C" function int read_mem(input int pc);
 `endif
-
+*/
 module imem_wrapper
     import tartaruga_pkg::*;
 (
@@ -75,10 +75,10 @@ module imem_wrapper
             if (req_valid_i && req_ready_o) begin
                 automatic int base_idx = (pc_i >> 2) & 32'hFFF;
                 data_pipe[0] <= {
-                    imem[(base_idx + 3) & 32'hFFF],
-                    imem[(base_idx + 2) & 32'hFFF],
-                    imem[(base_idx + 1) & 32'hFFF],
-                    imem[base_idx]
+                    read_mem(pc_i + 12),
+                    read_mem(pc_i + 8),
+                    read_mem(pc_i + 4),
+                    read_mem(pc_i)
                 };
                 valid_pipe[0] <= 1'b1;
                 rsp_mem_addr_pipe[0] <= pc_i;

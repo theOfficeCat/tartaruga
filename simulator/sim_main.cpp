@@ -12,6 +12,9 @@ extern "C" void close_commit();
 extern "C" void init_kanata(std::string path);
 extern "C" void close_kanata();
 
+extern bool load_elf(const char *path);
+extern void write_mem_dump(const char* path);
+
 vluint64_t main_time = 0;
 double sc_time_stamp() { return main_time; }
 
@@ -25,7 +28,11 @@ int main(int argc, char **argv) {
 
     std::cerr << argv[1] << std::endl;
 
-    load_data(argv[1]);
+    //load_data(argv[1]);
+    if (!load_elf(argv[1])) {
+        std::cerr << "Failed to load ELF file: " << argv[1] << std::endl;
+        return 1;
+    }
     init_commit(std::string(argv[1]) + std::string(".commit"));
     init_kanata(std::string(argv[1]) + std::string(".kanata"));
 
@@ -63,7 +70,7 @@ int main(int argc, char **argv) {
     uint32_t cycles_without_commit = 0;
     uint32_t total_cycles = 0;
     uint32_t commited_instructions = 0;
-    while (!Verilated::gotFinish() && cycles_without_commit <= 100) {
+    while (!Verilated::gotFinish() && cycles_without_commit <= 100 && main_time < 10000) {
         // clock negativo
         top->clk_i = 0;
         top->eval();
@@ -99,6 +106,8 @@ int main(int argc, char **argv) {
     if (cycles_without_commit >= 100) {
         std::cout << "[sim] Execution killed for more than 100 cycles without commiting instructions" << std::endl;
     }
+
+    write_mem_dump("memory_dump.txt");
 
     // Cierra traza y limpia
     if (gen_trace) {

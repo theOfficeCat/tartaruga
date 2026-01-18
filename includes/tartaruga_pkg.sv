@@ -236,4 +236,8 @@ package tartaruga_pkg;
         return (write_en && (rd != 5'd0) && (rd == rs));
     endfunction
 
+    parameter STORE_BUFFER_SIZE = 4;
+
+    typedef logic [$clog2(STORE_BUFFER_SIZE)-1:0] store_buffer_idx_t;
+
 endpackage

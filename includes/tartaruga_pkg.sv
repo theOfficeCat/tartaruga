@@ -124,6 +124,10 @@ package tartaruga_pkg;
         // Add types of instructions as structs of 32 bits to ease the decode
     } instruction_t;
 
+    parameter STORE_BUFFER_SIZE = 4;
+
+    typedef logic [$clog2(STORE_BUFFER_SIZE)-1:0] store_buffer_idx_t;
+
     localparam ROB_SIZE = 16;
     localparam ROB_IDX_BITS = $clog2(ROB_SIZE);
 
@@ -144,6 +148,8 @@ package tartaruga_pkg;
         logic branch_taken;
 
         int kanata_id;
+
+        store_buffer_idx_t store_buffer_idx;
     } rob_entry_t;
 
     typedef struct packed {
@@ -196,6 +202,7 @@ package tartaruga_pkg;
 
         logic branch_taken;
         bus32_t branched_pc;
+        store_buffer_idx_t store_buffer_idx;
     } mem_to_wb_t;
 
     parameter EXE_STAGES_DEFAULT = 1;
@@ -235,9 +242,4 @@ package tartaruga_pkg;
     );
         return (write_en && (rd != 5'd0) && (rd == rs));
     endfunction
-
-    parameter STORE_BUFFER_SIZE = 4;
-
-    typedef logic [$clog2(STORE_BUFFER_SIZE)-1:0] store_buffer_idx_t;
-
 endpackage

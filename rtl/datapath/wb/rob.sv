@@ -24,6 +24,7 @@ module rob
     input bus32_t        new_pc_i,
     input logic          branch_taken_i,
     input int            kanata_id_i,
+    input store_buffer_idx_t store_buffer_idx_i,
 
     // Commit output
     output logic         commit_valid_o,
@@ -36,6 +37,9 @@ module rob
     output bus32_t       commit_new_pc_o,
     output logic         commit_branch_taken_o,
     output int           commit_kanata_id_o,
+    output store_buffer_idx_t commit_store_buffer_idx_o,
+
+    input logic          sb_ready_i,
 
     output logic         rob_full_o,
 
@@ -90,6 +94,7 @@ module rob
             rob_d[rob_entry_commit_i].result       = result_i;
             rob_d[rob_entry_commit_i].new_pc       = new_pc_i;
             rob_d[rob_entry_commit_i].branch_taken = branch_taken_i;
+            rob_d[rob_entry_commit_i].store_buffer_idx = store_buffer_idx_i;
         end
 
         // Commit logic
@@ -104,9 +109,9 @@ module rob
             commit_new_pc_o          = rob_q[head_ptr_q].new_pc;
             commit_branch_taken_o    = rob_q[head_ptr_q].branch_taken;
             commit_kanata_id_o       = rob_q[head_ptr_q].kanata_id;
-            rob_d[head_ptr_q].valid    = 1'b0; // Mark entry as free
+            commit_store_buffer_idx_o = rob_q[head_ptr_q].store_buffer_idx;
 
-            head_ptr_d               = (head_ptr_q + 1) % ROB_SIZE;
+            head_ptr_d = (head_ptr_q + 1) % ROB_SIZE;
         end else begin
             commit_valid_o = 1'b0;
             commit_pc_o = '0;
@@ -118,6 +123,7 @@ module rob
             commit_new_pc_o = '0;
             commit_branch_taken_o = 1'b0;
             commit_kanata_id_o = 0;
+            commit_store_buffer_idx_o = '0;
 
             head_ptr_d = head_ptr_q;
         end
@@ -194,6 +200,7 @@ module rob
                 rob_q[i].new_pc     <= '0;
                 rob_q[i].branch_taken <= 1'b0;
                 rob_q[i].kanata_id  <= 0;
+                rob_q[i].store_buffer_idx <= '0;
             end
         end else begin
             head_ptr_q <= head_ptr_d;

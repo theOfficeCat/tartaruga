@@ -199,7 +199,7 @@ module datapath
 
     assign stall = (hazard_rob & ~solved_hazard) | stall_from_exe | (~valid_fetch) | rob_full | stall_from_mem;
 
-    assign decode_to_exe_d.valid = ~stall & valid_decode;
+    assign decode_to_exe_d.valid = ~stall & valid_decode & ~commit_branch_taken;
 
     always_ff @(negedge rstn_i, posedge clk_i) begin
         if (~rstn_i) begin

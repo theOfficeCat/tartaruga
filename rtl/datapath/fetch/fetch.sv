@@ -37,7 +37,7 @@ module fetch
     assign pc_o = pc_q;
 
     bus32_t        mem_pc;
-    logic [127:0]  mem_instr_line;
+    logic [511:0]  mem_instr_line;
 
     logic       req_valid;
     logic       req_ready;

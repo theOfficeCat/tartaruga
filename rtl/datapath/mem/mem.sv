@@ -110,21 +110,21 @@ module mem
     );
 
     always_ff @(posedge clk_i) begin
-        if (exe_to_mem_i.valid && exe_to_mem_i.instr.store_to_mem && exe_to_mem_i.result == 32'h40000000) begin
-            if (exe_to_mem_i.data_rs2 == 32'h1) begin
-                $display("Execution succeeded at PC 0x%h", exe_to_mem_i.instr.pc);
+        if (sb_rsp_valid && sb_out_addr == 32'h40000000) begin
+            if (dcache_wr_data == 32'h1) begin
+                $display("Execution succeeded");
                 $finish();
             end
-            else if (exe_to_mem_i.data_rs2 == 32'h2) begin
-                $display("Execution failed at PC 0x%h", exe_to_mem_i.instr.pc);
+            else if (dcache_wr_data == 32'h2) begin
+                $display("Execution failed");
                 $finish();
             end
             else begin
-                $display("Error at PC 0x%h", exe_to_mem_i.instr.pc);
+                $display("Error");
                 $finish();
             end
         end
-    end
+        end
 
     assign mem_to_wb_o.instr = exe_to_mem_i.instr;
 

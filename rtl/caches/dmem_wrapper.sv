@@ -81,7 +81,7 @@ module dmem_wrapper
                 req_valid_pipe[i] <= req_valid_pipe[i-1];
             end
 
-            if (req_valid_i && req_ready_o) begin
+            if (req_valid_pipe[LAT-1]) begin
                 automatic int base_idx = (addr_i >> 2) & 32'hFFF;
 
                 if (we_pipe[LAT-1]) begin
@@ -102,11 +102,12 @@ module dmem_wrapper
                     };
                 end
 
-                valid_pipe[0] <= 1'b1;
+                valid_pipe[0] <= req_valid_pipe[LAT-1];
                 rsp_mem_addr_pipe[0] <= {req_addr_pipe[LAT-1][31:4], 4'h0};
                 we_pipe[0] <= we_i;
                 data_wr_pipe[0] <= data_wr_i;
             end
+
             req_addr_pipe[0] <= addr_i;
             req_valid_pipe[0] <= req_valid_i;
         end

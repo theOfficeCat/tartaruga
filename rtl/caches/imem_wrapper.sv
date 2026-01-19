@@ -21,7 +21,7 @@ module imem_wrapper
     output logic     rsp_valid_o,
     input  logic     rsp_ready_i,
     output bus32_t   rsp_mem_addr_o,
-    output logic [127:0] instr_line_o
+    output logic [511:0] instr_line_o
 );
 
     bus32_t imem [IMEM_POS-1:0];
@@ -39,7 +39,7 @@ module imem_wrapper
 
 
 
-    logic [127:0] data_pipe [LAT-1:0];
+    logic [511:0] data_pipe [LAT-1:0];
     logic   valid_pipe [LAT-1:0];
     bus32_t rsp_mem_addr_pipe [LAT-1:0];
 
@@ -88,6 +88,18 @@ module imem_wrapper
             if (req_valid_pipe[LAT-1]) begin
                 automatic int base_idx = (req_addr_pipe[LAT-1] >> 2) & 32'hFFF;
                 data_pipe[0] <= {
+                    read_mem(req_addr_pipe[LAT-1] + 12 + 48),
+                    read_mem(req_addr_pipe[LAT-1] + 8 + 48),
+                    read_mem(req_addr_pipe[LAT-1] + 4 + 48),
+                    read_mem(req_addr_pipe[LAT-1] + 48),
+                    read_mem(req_addr_pipe[LAT-1] + 12 + 32),
+                    read_mem(req_addr_pipe[LAT-1] + 8 + 32),
+                    read_mem(req_addr_pipe[LAT-1] + 4 + 32),
+                    read_mem(req_addr_pipe[LAT-1] + 32),
+                    read_mem(req_addr_pipe[LAT-1] + 12 + 16),
+                    read_mem(req_addr_pipe[LAT-1] + 8 + 16),
+                    read_mem(req_addr_pipe[LAT-1] + 4 + 16),
+                    read_mem(req_addr_pipe[LAT-1] + 16),
                     read_mem(req_addr_pipe[LAT-1] + 12),
                     read_mem(req_addr_pipe[LAT-1] + 8),
                     read_mem(req_addr_pipe[LAT-1] + 4),

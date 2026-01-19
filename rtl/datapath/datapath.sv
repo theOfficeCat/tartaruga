@@ -43,6 +43,7 @@ module datapath
     bus32_t commit_new_pc;
     logic commit_branch_taken;
     int commit_kanata_id;
+    store_buffer_idx_t commit_store_buffer_idx;
 
     logic rob_full;
 
@@ -249,7 +250,9 @@ module datapath
         .rstn_i(rstn_i),
         .exe_to_mem_i(exe_to_mem_q),
         .mem_to_wb_o(mem_to_wb_d),
-        .stall_o(stall_from_mem)
+        .stall_o(stall_from_mem),
+        .commited_store_buffer_i(commit_store_to_mem),
+        .commited_store_buffer_idx_i(commit_store_buffer_idx)
     );
 
     always_ff @(negedge rstn_i, posedge clk_i) begin
@@ -279,6 +282,7 @@ module datapath
         .result_i(mem_to_wb_q.result),
         .new_pc_i(mem_to_wb_q.branched_pc),
         .branch_taken_i(mem_to_wb_q.branch_taken),
+        .store_buffer_idx_i(mem_to_wb_q.store_buffer_idx),
 
         .commit_valid_o(commit_valid),
         .commit_pc_o(commit_pc),
@@ -290,6 +294,7 @@ module datapath
         .commit_new_pc_o(commit_new_pc),
         .commit_branch_taken_o(commit_branch_taken),
         .commit_kanata_id_o(commit_kanata_id),
+        .commit_store_buffer_idx_o(commit_store_buffer_idx),
 
         .rob_full_o(rob_full),
 

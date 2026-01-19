@@ -34,7 +34,7 @@ module icache
     } cache_line_t;
 
     cache_line_t cache_mem[NUM_SETS][ASSOCIATIVITY];
-    logic [LRU_COUNTER_BITS-1:0] lru_counter[NUM_SETS][ASSOCIATIVITY];
+    logic [LRU_COUNTER_BITS-1:0] lru_counter[NUM_SETS];
 
     logic [INDEX_BITS-1:0] index;
     logic [TAG_BITS-1:0] tag_in;
@@ -97,7 +97,7 @@ module icache
                     for (int k = 0; k < WORDS_PER_LINE; k++) begin
                         cache_mem[i][j].data[k] <= '0;
                     end
-                    lru_counter[i][j] <= j[LRU_COUNTER_BITS-1:0];
+                    lru_counter[i] <= j[LRU_COUNTER_BITS-1:0];
                 end
             end
         end else begin
@@ -111,13 +111,13 @@ module icache
 
             if (hit) begin
                 logic [LRU_COUNTER_BITS-1:0] old_lru;
-                old_lru = lru_counter[index][hit_way_sel];
+                old_lru = lru_counter[index];
                 
                 for (int i = 0; i < ASSOCIATIVITY; i++) begin
                     if (i[LRU_COUNTER_BITS-1:0] == hit_way_sel) begin
-                        lru_counter[index][i] <= '0;
-                    end else if (lru_counter[index][i] < old_lru) begin
-                        lru_counter[index][i] <= lru_counter[index][i] + 1'b1;
+                        lru_counter[index] <= '0;
+                    end else if (lru_counter[index] < old_lru) begin
+                        lru_counter[index] <= lru_counter[index] + 1'b1;
                     end
                 end
             end
@@ -132,7 +132,7 @@ module icache
                 
                 lru_way = '0;
                 for (int i = 0; i < ASSOCIATIVITY; i++) begin
-                    if (lru_counter[rsp_index][i] == (LRU_COUNTER_BITS)'(ASSOCIATIVITY-1)) begin
+                    if (lru_counter[rsp_index] == (LRU_COUNTER_BITS)'(ASSOCIATIVITY-1)) begin
                         lru_way = i[LRU_COUNTER_BITS-1:0];
                     end
                 end
@@ -146,11 +146,11 @@ module icache
                 
                 for (int i = 0; i < ASSOCIATIVITY; i++) begin
                     if (i[LRU_COUNTER_BITS-1:0] == lru_way) begin
-                        lru_counter[rsp_index][i] <= '0;
-                    end else if (lru_counter[rsp_index][i] < 
+                        lru_counter[rsp_index] <= '0;
+                    end else if (lru_counter[rsp_index] < 
                                (LRU_COUNTER_BITS)'(ASSOCIATIVITY-1)) begin
-                        lru_counter[rsp_index][i] <= 
-                            lru_counter[rsp_index][i] + 1'b1;
+                        lru_counter[rsp_index] <= 
+                            lru_counter[rsp_index] + 1'b1;
                     end
                 end
             end

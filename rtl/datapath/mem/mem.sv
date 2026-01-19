@@ -8,7 +8,8 @@ module mem
     output stall_o,
 
     input logic commited_store_buffer_i,
-    input store_buffer_idx_t commited_store_buffer_idx_i
+    input store_buffer_idx_t commited_store_buffer_idx_i,
+    input logic [STORE_BUFFER_SIZE-1:0] discard_store_buffer_i
 );
 
     bus32_t dcache_data_rd;
@@ -71,7 +72,7 @@ module mem
         .store_buffer_idx_o(mem_to_wb_o.store_buffer_idx),
         .store_buffer_commit_i(commited_store_buffer_i),
         .store_buffer_idx_commit_i(commited_store_buffer_idx_i),
-        .store_buffer_discard_i('0) // Not used in this design
+        .store_buffer_discard_i(discard_store_buffer_i)
     );
 
     dcache dcache_inst (

@@ -38,6 +38,7 @@ module rob
     output logic         commit_branch_taken_o,
     output int           commit_kanata_id_o,
     output store_buffer_idx_t commit_store_buffer_idx_o,
+    output logic[STORE_BUFFER_SIZE-1:0] discard_store_buffer_o,
 
     output logic         rob_full_o,
 
@@ -127,6 +128,8 @@ module rob
             head_ptr_d = head_ptr_q;
         end
 
+        discard_store_buffer_o = '0;
+
         // Branch taken -> flush ROB entries when the branch is commited
         `ifdef TB
         if ((rob_q[head_ptr_q].valid && rob_q[head_ptr_q].completed && rob_q[head_ptr_q].branch_taken) || flush_i) begin
@@ -134,6 +137,10 @@ module rob
         if (rob_q[head_ptr_q].valid && rob_q[head_ptr_q].completed && rob_q[head_ptr_q].branch_taken) begin
         `endif
             for (int i = 0; i < ROB_SIZE; ++i) begin
+                if (rob_q[i].valid && rob_q[i].store_to_mem == 1'b1) begin
+                    discard_store_buffer_o[rob_q[i].store_buffer_idx] = 1'b1;
+                end
+
                 rob_d[i].valid      = 1'b0;
             end
             head_ptr_d = '0;

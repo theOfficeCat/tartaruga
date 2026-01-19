@@ -129,6 +129,9 @@ package tartaruga_pkg;
 
     typedef logic[ROB_IDX_BITS-1:0] rob_idx_t;
 
+    localparam STORE_BUFFER_SIZE = 4;
+    typedef logic[$clog2(STORE_BUFFER_SIZE)-1:0] store_buffer_idx_t;
+
     typedef struct packed {
         logic valid;
         logic completed;
@@ -142,6 +145,8 @@ package tartaruga_pkg;
         bus32_t result;
         bus32_t new_pc;
         logic branch_taken;
+
+        store_buffer_idx_t store_buffer_idx;
 
         int kanata_id;
     } rob_entry_t;
@@ -196,6 +201,8 @@ package tartaruga_pkg;
 
         logic branch_taken;
         bus32_t branched_pc;
+
+        store_buffer_idx_t store_buffer_idx;
     } mem_to_wb_t;
 
     parameter EXE_STAGES_DEFAULT = 1;

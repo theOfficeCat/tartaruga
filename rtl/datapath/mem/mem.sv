@@ -5,7 +5,10 @@ module mem
     input logic rstn_i,
     input exe_to_mem_t exe_to_mem_i,
     output mem_to_wb_t mem_to_wb_o,
-    output stall_o
+    output stall_o,
+
+    input logic commited_store_buffer_i,
+    input store_buffer_idx_t commited_store_buffer_idx_i
 );
 
     bus32_t dcache_data_rd;
@@ -20,19 +23,64 @@ module mem
     logic dmem_rsp_ready;
     bus32_t dmem_rsp_addr;
 
-    logic is_mem_access;
-    assign is_mem_access = (exe_to_mem_i.instr.wb_origin == MEM || exe_to_mem_i.instr.store_to_mem) && exe_to_mem_i.valid;
+    logic is_load;
+    assign is_load = (exe_to_mem_i.instr.wb_origin == MEM) && exe_to_mem_i.valid;
+
+    logic is_store;
+    assign is_store = exe_to_mem_i.instr.store_to_mem && exe_to_mem_i.valid;
+
+    bus32_t dcache_addr;
+    //assign dcache_addr = exe_to_mem_i.result;
+
+    bus32_t dcache_wr_data;
+    //assign dcache_wr_data = exe_to_mem_i.data_rs2;
+
+    logic sb_ready;
+    logic sb_rsp_valid;
+
+    logic request_to_dcache;
+    assign request_to_dcache = is_load || sb_rsp_valid;
 
     logic mem_we;
-    assign mem_we = exe_to_mem_i.instr.store_to_mem;
+    assign mem_we = sb_rsp_valid;
+
+    logic bypass_from_sb;
+    bus32_t data_from_sb;
+
+    logic is_collision;
+    assign is_collision = is_load && sb_rsp_valid && !bypass_from_sb; // There is a load and the store buffer is storing at the same time
+
+    bus32_t sb_out_addr;
+
+    assign dcache_addr = sb_rsp_valid ? sb_out_addr : exe_to_mem_i.result;
+
+    store_buffer store_buffer_inst (
+        .clk_i(clk_i),
+        .rstn_i(rstn_i),
+        .data_i(exe_to_mem_i.data_rs2),
+        .addr_i(exe_to_mem_i.result),
+        .load_i(is_load),
+        .bypass_o(bypass_from_sb),
+        .data_rd_o(data_from_sb),
+        .req_valid_i(is_store),
+        .req_ready_o(sb_ready),
+        .rsp_valid_o(sb_rsp_valid),
+        .rsp_ready_i(dcache_ready),
+        .addr_o(sb_out_addr),
+        .data_wr_o(dcache_wr_data),
+        .store_buffer_idx_o(mem_to_wb_o.store_buffer_idx),
+        .store_buffer_commit_i(commited_store_buffer_i),
+        .store_buffer_idx_commit_i(commited_store_buffer_idx_i),
+        .store_buffer_discard_i('0) // Not used in this design
+    );
 
     dcache dcache_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
-        .addr_i(exe_to_mem_i.result),
-        .data_wr_i(exe_to_mem_i.data_rs2),
+        .addr_i(dcache_addr),
+        .data_wr_i(dcache_wr_data),
         .we_i(mem_we),
-        .valid_i(is_mem_access),
+        .valid_i(request_to_dcache),
         .data_rd_o(dcache_data_rd),
         .ready_o(dcache_ready),
         .mem_addr_o(dmem_addr),
@@ -61,7 +109,7 @@ module mem
     );
 
     always_ff @(posedge clk_i) begin
-        if (exe_to_mem_i.valid && mem_we && exe_to_mem_i.result == 32'h40000000) begin
+        if (exe_to_mem_i.valid && exe_to_mem_i.instr.store_to_mem && exe_to_mem_i.result == 32'h40000000) begin
             if (exe_to_mem_i.data_rs2 == 32'h1) begin
                 $display("Execution succeeded at PC 0x%h", exe_to_mem_i.instr.pc);
                 $finish();
@@ -78,13 +126,30 @@ module mem
     end
 
     assign mem_to_wb_o.instr = exe_to_mem_i.instr;
-    assign mem_to_wb_o.valid = exe_to_mem_i.valid &&
-                              (((exe_to_mem_i.instr.wb_origin != MEM) && !exe_to_mem_i.instr.store_to_mem) || dcache_ready);
+
+    logic valid_no_mem;
+    logic valid_store;
+    logic valid_load;
+
+    assign valid_no_mem = exe_to_mem_i.valid && (exe_to_mem_i.instr.wb_origin != MEM) && exe_to_mem_i.instr.store_to_mem == 1'b0;
+    assign valid_store  = exe_to_mem_i.valid && (exe_to_mem_i.instr.store_to_mem == 1'b1) && dcache_ready;
+
+    //assign valid_load   = exe_to_mem_i.valid && (exe_to_mem_i.instr.wb_origin == MEM) && dcache_ready;
+
+    logic valid_load_bypass;
+    assign valid_load_bypass = exe_to_mem_i.valid && (exe_to_mem_i.instr.wb_origin == MEM) && bypass_from_sb;
+
+    logic valid_load_dcache;
+    assign valid_load_dcache = exe_to_mem_i.valid && (exe_to_mem_i.instr.wb_origin == MEM) && dcache_ready && !bypass_from_sb && !is_collision;
+
+    assign valid_load = valid_load_bypass || valid_load_dcache;
+
+    assign mem_to_wb_o.valid = valid_no_mem || valid_load || valid_store;
     assign mem_to_wb_o.branch_taken = exe_to_mem_i.branch_taken;
     assign mem_to_wb_o.branched_pc = (exe_to_mem_i.branch_taken == 1'b1) ?
                                     exe_to_mem_i.result : '0;
 
-    assign stall_o = !dcache_ready;
+    assign stall_o = (is_load && !dcache_ready) || is_collision || (is_store && !sb_ready);
 
     always_comb begin
         case (exe_to_mem_i.instr.wb_origin)
@@ -92,7 +157,12 @@ module mem
                 mem_to_wb_o.result = exe_to_mem_i.result;
             end
             MEM: begin
-                mem_to_wb_o.result = dcache_data_rd;
+                if (valid_load_bypass) begin
+                    mem_to_wb_o.result = data_from_sb;
+                end
+                else begin
+                    mem_to_wb_o.result = dcache_data_rd;
+                end
             end
             PC_4: begin
                 mem_to_wb_o.result = exe_to_mem_i.instr.pc + 4;

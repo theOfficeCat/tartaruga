@@ -28,6 +28,9 @@ module dmem_wrapper
 
     localparam int LAT = 5;
 
+    bus32_t req_addr_pipe [LAT-1:0];
+    logic req_valid_pipe [LAT-1:0];
+
     logic [127:0] data_pipe [LAT-1:0];
     logic         valid_pipe [LAT-1:0];
     bus32_t       rsp_mem_addr_pipe [LAT-1:0];
@@ -38,6 +41,9 @@ module dmem_wrapper
         req_ready_o = 1'b1;
         for (int i = 0; i < LAT; i++) begin
             req_ready_o &= ~valid_pipe[i];
+        end
+        for (int i = 0; i < LAT; i++) begin
+            req_ready_o &= ~req_valid_pipe[i];
         end
     end
 
@@ -51,6 +57,8 @@ module dmem_wrapper
                 data_pipe[i]  <= '0;
                 valid_pipe[i] <= 1'b0;
                 rsp_mem_addr_pipe[i] <= '0;
+                req_addr_pipe[i] <= '0;
+                req_valid_pipe[i] <= 1'b0;
                 we_pipe[i] <= 1'b0;
                 data_wr_pipe[i] <= '0;
             end
@@ -68,34 +76,39 @@ module dmem_wrapper
                     data_wr_pipe[i] <= data_wr_pipe[i-1];
                     valid_pipe[i-1] <= 1'b0;
                 end
+
+                req_addr_pipe[i] <= req_addr_pipe[i-1];
+                req_valid_pipe[i] <= req_valid_pipe[i-1];
             end
 
             if (req_valid_i && req_ready_o) begin
                 automatic int base_idx = (addr_i >> 2) & 32'hFFF;
 
-                if (we_i) begin
-                    write_mem(addr_i, data_wr_i);
+                if (we_pipe[LAT-1]) begin
+                    write_mem(req_addr_pipe[LAT-1], data_pipe[LAT-1]);
 
                     data_pipe[0] <= {
-                        read_mem({addr_i[31:4], 4'hC}),
-                        read_mem({addr_i[31:4], 4'h8}),
-                        read_mem({addr_i[31:4], 4'h4}),
-                        read_mem({addr_i[31:4], 4'h0})
+                        read_mem({req_addr_pipe[LAT-1][31:4], 4'hC}),
+                        read_mem({req_addr_pipe[LAT-1][31:4], 4'h8}),
+                        read_mem({req_addr_pipe[LAT-1][31:4], 4'h4}),
+                        read_mem({req_addr_pipe[LAT-1][31:4], 4'h0})
                     };
                 end else begin
                     data_pipe[0] <= {
-                        read_mem({addr_i[31:4], 4'hC}),
-                        read_mem({addr_i[31:4], 4'h8}),
-                        read_mem({addr_i[31:4], 4'h4}),
-                        read_mem({addr_i[31:4], 4'h0})
+                        read_mem({req_addr_pipe[LAT-1][31:4], 4'hC}),
+                        read_mem({req_addr_pipe[LAT-1][31:4], 4'h8}),
+                        read_mem({req_addr_pipe[LAT-1][31:4], 4'h4}),
+                        read_mem({req_addr_pipe[LAT-1][31:4], 4'h0})
                     };
                 end
 
                 valid_pipe[0] <= 1'b1;
-                rsp_mem_addr_pipe[0] <= {addr_i[31:4], 4'h0};
+                rsp_mem_addr_pipe[0] <= {req_addr_pipe[LAT-1][31:4], 4'h0};
                 we_pipe[0] <= we_i;
                 data_wr_pipe[0] <= data_wr_i;
             end
+            req_addr_pipe[0] <= addr_i;
+            req_valid_pipe[0] <= req_valid_i;
         end
     end
 

@@ -34,6 +34,11 @@ module imem_wrapper
 
     localparam int LAT = 5;
 
+    bus32_t req_addr_pipe [LAT-1:0];
+    logic req_valid_pipe [LAT-1:0];
+
+
+
     logic [127:0] data_pipe [LAT-1:0];
     logic   valid_pipe [LAT-1:0];
     bus32_t rsp_mem_addr_pipe [LAT-1:0];
@@ -44,6 +49,9 @@ module imem_wrapper
 
         for (int i = 0; i < LAT; i++) begin
             req_ready_o &= ~valid_pipe[i];
+        end
+        for (int i = 0; i < LAT; i++) begin
+            req_ready_o &= ~req_valid_pipe[i];
         end
     end
 
@@ -57,6 +65,8 @@ module imem_wrapper
                 data_pipe[i]  <= '0;
                 valid_pipe[i] <= 1'b0;
                 rsp_mem_addr_pipe[i] <= '0;
+                req_addr_pipe[i] <= '0;
+                req_valid_pipe[i] <= 1'b0;
             end
         end else begin
             if (rsp_valid_o && rsp_ready_i) begin
@@ -70,19 +80,25 @@ module imem_wrapper
                     rsp_mem_addr_pipe[i] <= rsp_mem_addr_pipe[i-1];
                     valid_pipe[i-1] <= 1'b0;
                 end
+
+                req_addr_pipe[i] <= req_addr_pipe[i-1];
+                req_valid_pipe[i] <= req_valid_pipe[i-1];
             end
 
-            if (req_valid_i && req_ready_o) begin
-                automatic int base_idx = (pc_i >> 2) & 32'hFFF;
+            if (req_valid_pipe[LAT-1]) begin
+                automatic int base_idx = (req_addr_pipe[LAT-1] >> 2) & 32'hFFF;
                 data_pipe[0] <= {
-                    read_mem(pc_i + 12),
-                    read_mem(pc_i + 8),
-                    read_mem(pc_i + 4),
-                    read_mem(pc_i)
+                    read_mem(req_addr_pipe[LAT-1] + 12),
+                    read_mem(req_addr_pipe[LAT-1] + 8),
+                    read_mem(req_addr_pipe[LAT-1] + 4),
+                    read_mem(req_addr_pipe[LAT-1])
                 };
                 valid_pipe[0] <= 1'b1;
-                rsp_mem_addr_pipe[0] <= pc_i;
+                rsp_mem_addr_pipe[0] <= req_addr_pipe[LAT-1];
             end
+
+            req_addr_pipe[0] <= pc_i;
+            req_valid_pipe[0] <= req_valid_i;
         end
     end
 

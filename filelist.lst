@@ -20,5 +20,7 @@ rtl/datapath/mem/mem.sv
 rtl/datapath/mem/store_buffer.sv
 rtl/caches/dcache.sv
 rtl/caches/dmem_wrapper.sv
+rtl/caches/dtlb.sv
+rtl/caches/ptw.sv
 
 rtl/datapath/wb/rob.sv

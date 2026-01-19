@@ -18,9 +18,6 @@ extern "C" int read_mem(int addr) {
 
     int index = (addr >> 2);
 
-    //std::cout << "[DPI] read_mem called with addr: 0x"
-    //          << std::hex << addr << std::dec << " (index: " << index << ")\n";
-
     if (index >= 0 && index < (1024*256)) {
         return static_cast<int>(mem[index]);
     } else {
@@ -44,6 +41,30 @@ extern "C" void write_mem(int addr, int data) {
         std::cerr << "[DPI] Error: write_mem address out of bounds: 0x"
                   << std::hex << addr << std::dec << std::endl;
     }
+}
+
+extern "C" void init_page_tables() {
+    if (!mem_initialized) {
+        std::memset(mem, 0, sizeof(mem));
+        mem_initialized = true;
+    }
+
+    // Reservar espacio para tablas de páginas en las primeras 8KB de memoria física
+    // L1 Table en 0x1000 (4KB), L2 Tables en 0x2000 (8KB)
+    
+    // Inicializar L1 Table (nivel 1) - una entrada apuntando a L2 Table
+    // Cada entrada de 32 bits: bit 0 = válido, bits [19:0] = dirección física/PPN
+    write_mem(0x1000, 0x2001);  // Entrada 0: apunta a L2 Table en 0x2000, válido=1
+    
+    // Inicializar L2 Table (nivel 2) - mapeo identidad para las primeras 256 páginas (1MB)
+    // Cada entrada: (dirección_física << 12) | 1 (válido)
+    for (int i = 0; i < 256; i++) {
+        uint32_t phys_addr = i * 0x1000;  // 4KB por página
+        write_mem(0x2000 + i*4, (phys_addr << 12) | 0x1);
+    }
+    
+    std::cout << "[DPI] Page tables initialized (L1 at 0x1000, L2 at 0x2000)" << std::endl;
+    std::cout << "[DPI] Identity mapping for first 1MB of physical memory" << std::endl;
 }
 
 extern void write_mem_dump(const char* path) {

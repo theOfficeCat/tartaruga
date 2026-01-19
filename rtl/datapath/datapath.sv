@@ -44,6 +44,7 @@ module datapath
     logic commit_branch_taken;
     int commit_kanata_id;
     store_buffer_idx_t commit_store_buffer_idx;
+    logic [STORE_BUFFER_SIZE-1:0] discard_store_buffer;
 
     logic rob_full;
 
@@ -252,7 +253,8 @@ module datapath
         .mem_to_wb_o(mem_to_wb_d),
         .stall_o(stall_from_mem),
         .commited_store_buffer_i(commit_store_to_mem),
-        .commited_store_buffer_idx_i(commit_store_buffer_idx)
+        .commited_store_buffer_idx_i(commit_store_buffer_idx),
+        .discard_store_buffer_i(discard_store_buffer)
     );
 
     always_ff @(negedge rstn_i, posedge clk_i) begin
@@ -295,6 +297,7 @@ module datapath
         .commit_branch_taken_o(commit_branch_taken),
         .commit_kanata_id_o(commit_kanata_id),
         .commit_store_buffer_idx_o(commit_store_buffer_idx),
+        .discard_store_buffer_o(discard_store_buffer),
 
         .rob_full_o(rob_full),
 

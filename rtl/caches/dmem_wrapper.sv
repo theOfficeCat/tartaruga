@@ -28,72 +28,77 @@ module dmem_wrapper
 
     localparam int LAT = 5;
 
-    logic [127:0] data_pipe [LAT-1:0];
-    logic         valid_pipe [LAT-1:0];
-    bus32_t       rsp_mem_addr_pipe [LAT-1:0];
-    logic         we_pipe [LAT-1:0];
+    logic req_valid_pipe [LAT-1:0];
+    bus32_t req_addr_pipe [LAT-1:0];
+    logic we_pipe [LAT-1:0];
     logic [127:0] data_wr_pipe [LAT-1:0];
 
-    always_comb begin
-        req_ready_o = 1'b1;
-        for (int i = 0; i < LAT; i++) begin
-            req_ready_o &= ~valid_pipe[i];
-        end
-    end
-
-    assign data_line_o = data_pipe[LAT-1];
-    assign rsp_valid_o = valid_pipe[LAT-1];
-    assign rsp_mem_addr_o = rsp_mem_addr_pipe[LAT-1];
+    logic rsp_valid_pipe [LAT-1:0];
+    bus32_t rsp_mem_addr_pipe [LAT-1:0];
+    logic [127:0] data_pipe [LAT-1:0];
 
     always_ff @(posedge clk_i or negedge rstn_i) begin
         if (!rstn_i) begin
             for (int i = 0; i < LAT; i++) begin
-                data_pipe[i]  <= '0;
-                valid_pipe[i] <= 1'b0;
-                rsp_mem_addr_pipe[i] <= '0;
+                req_valid_pipe[i] <= 1'b0;
+                req_addr_pipe[i] <= '0;
                 we_pipe[i] <= 1'b0;
                 data_wr_pipe[i] <= '0;
             end
         end else begin
-            if (rsp_valid_o && rsp_ready_i) begin
-                valid_pipe[LAT-1] <= 1'b0;
-            end
-
+            // Shift pipeline stages
             for (int i = LAT-1; i > 0; i--) begin
-                if (!valid_pipe[i]) begin
-                    valid_pipe[i] <= valid_pipe[i-1];
-                    data_pipe[i]  <= data_pipe[i-1];
-                    rsp_mem_addr_pipe[i] <= rsp_mem_addr_pipe[i-1];
-                    we_pipe[i] <= we_pipe[i-1];
-                    data_wr_pipe[i] <= data_wr_pipe[i-1];
-                    valid_pipe[i-1] <= 1'b0;
+                req_valid_pipe[i] <= req_valid_pipe[i-1];
+                req_addr_pipe[i] <= req_addr_pipe[i-1];
+                we_pipe[i] <= we_pipe[i-1];
+                data_wr_pipe[i] <= data_wr_pipe[i-1];
+
+                rsp_valid_pipe[i] <= rsp_valid_pipe[i-1];
+                rsp_mem_addr_pipe[i] <= rsp_mem_addr_pipe[i-1];
+                data_pipe[i] <= data_pipe[i-1];
+            end
+
+            // Load new request
+            req_valid_pipe[0] <= req_valid_i;
+            req_addr_pipe[0] <= addr_i;
+            we_pipe[0] <= we_i;
+            data_wr_pipe[0] <= data_wr_i;
+
+            // Process memory operation
+            if (req_valid_pipe[LAT-1]) begin
+                if (we_pipe[LAT-1]) begin
+                    for (int i = 0; i < 4; i++) begin
+                        write_mem(req_addr_pipe[LAT-1] + i*4, data_wr_pipe[LAT-1][i*32 +: 32]);
+                    end
+                end else begin
+                    logic [127:0] read_data;
+                    for (int i = 0; i < 4; i++) begin
+                        read_data[i*32 +: 32] = read_mem(req_addr_pipe[LAT-1] + i*4);
+                    end
+                    data_pipe[0] <= read_data;
                 end
-            end
-
-            if (req_valid_i && req_ready_o) begin
-                automatic int base_idx = (addr_i >> 2) & 32'hFFF;
-
-                data_pipe[0] <= {
-                    read_mem({addr_i[31:4], 4'hC}),
-                    read_mem({addr_i[31:4], 4'h8}),
-                    read_mem({addr_i[31:4], 4'h4}),
-                    read_mem({addr_i[31:4], 4'h0})
-                };
-
-                valid_pipe[0] <= 1'b1;
-                rsp_mem_addr_pipe[0] <= {addr_i[31:4], 4'h0};
-                we_pipe[0] <= we_i;
-                data_wr_pipe[0] <= data_wr_i;
-            end
-
-
-            if (we_pipe[LAT-1] && valid_pipe[LAT-1]) begin
-                write_mem({rsp_mem_addr_pipe[LAT-1][31:4], 4'hC} , data_wr_pipe[LAT-1][127:96]);
-                write_mem({rsp_mem_addr_pipe[LAT-1][31:4], 4'h8} , data_wr_pipe[LAT-1][95:64]);
-                write_mem({rsp_mem_addr_pipe[LAT-1][31:4], 4'h4} , data_wr_pipe[LAT-1][63:32]);
-                write_mem({rsp_mem_addr_pipe[LAT-1][31:4], 4'h0} , data_wr_pipe[LAT-1][31:0]);
+                rsp_mem_addr_pipe[0] <= req_addr_pipe[LAT-1];
+                rsp_valid_pipe[0] <= 1'b1;
+            end else begin
+                rsp_valid_pipe[0] <= 1'b0;
             end
         end
     end
+
+    always_comb begin
+        req_ready_o = 1'b1;
+
+        for (int i = 0; i < LAT; i++) begin
+            req_ready_o &= ~req_valid_pipe[i];
+        end
+
+        for (int i = 0; i < LAT; i++) begin
+            req_ready_o &= ~rsp_valid_pipe[i];
+        end
+    end
+
+    assign data_line_o     = data_pipe[LAT-1];
+    assign rsp_valid_o = rsp_valid_pipe[LAT-1];
+    assign rsp_mem_addr_o = rsp_mem_addr_pipe[LAT-1];
 
 endmodule

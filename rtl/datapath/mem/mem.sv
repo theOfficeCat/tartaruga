@@ -22,7 +22,7 @@ module mem
     logic dmem_req_ready;
     logic [127:0] dmem_data_line;
     logic dmem_we;
-    bus32_t dmem_data_wr;
+    logic [127:0] dmem_data_wr;
     logic dmem_rsp_valid;
     logic dmem_rsp_ready;
     bus32_t dmem_rsp_addr;
@@ -78,7 +78,8 @@ module mem
         .store_buffer_discard_i(discard_store_buffer_i)
     );
 
-    dcache dcache_inst (
+
+    new_dcache dcache_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .addr_i(dcache_addr),

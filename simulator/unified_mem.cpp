@@ -7,7 +7,7 @@
 #include <cstring>
 
 
-static uint32_t mem[1024*256]; // 1MiB memory
+static uint32_t mem[1024*1024*256]; // 1MiB memory
 static bool mem_initialized = false;
 
 extern "C" int read_mem(int addr) {
@@ -21,7 +21,7 @@ extern "C" int read_mem(int addr) {
     //std::cout << "[DPI] read_mem called with addr: 0x"
     //          << std::hex << addr << std::dec << " (index: " << index << ")\n";
 
-    if (index >= 0 && index < (1024*256)) {
+    if (index >= 0 && index < (1024*1024*256)) {
         return static_cast<int>(mem[index]);
     } else {
         std::cerr << "[DPI] Error: read_mem address out of bounds: 0x"
@@ -42,7 +42,7 @@ extern "C" void write_mem(int addr, int data) {
               << std::hex << addr << std::dec << " (index: " << index
               << "), data: 0x" << std::hex << data << std::dec << "\n";
 
-    if (index >= 0 && index < (1024*256)) {
+    if (index >= 0 && index < (1024*1024*256)) {
         mem[index] = static_cast<uint32_t>(data);
     } else {
         std::cerr << "[DPI] Error: write_mem address out of bounds: 0x"

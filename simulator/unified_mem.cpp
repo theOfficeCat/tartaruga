@@ -38,6 +38,10 @@ extern "C" void write_mem(int addr, int data) {
 
     int index = (addr >> 2);
 
+    std::cout << "[DPI] write_mem called with addr: 0x"
+              << std::hex << addr << std::dec << " (index: " << index
+              << "), data: 0x" << std::hex << data << std::dec << "\n";
+
     if (index >= 0 && index < (1024*256)) {
         mem[index] = static_cast<uint32_t>(data);
     } else {

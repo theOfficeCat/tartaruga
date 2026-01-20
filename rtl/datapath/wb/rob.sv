@@ -26,6 +26,9 @@ module rob
     input int            kanata_id_i,
     input store_buffer_idx_t store_buffer_idx_i,
 
+    input rob_idx_t      check_alive_i,
+    output logic         still_alive_o,
+
     // Commit output
     output logic         commit_valid_o,
     output bus32_t       commit_pc_o,
@@ -137,8 +140,8 @@ module rob
         if (rob_q[head_ptr_q].valid && rob_q[head_ptr_q].completed && rob_q[head_ptr_q].branch_taken) begin
         `endif
             for (int i = 0; i < ROB_SIZE; ++i) begin
-                if (rob_q[i].valid && rob_q[i].store_to_mem == 1'b1) begin
-                    discard_store_buffer_o[rob_q[i].store_buffer_idx] = 1'b1;
+                if (rob_d[i].valid && rob_d[i].store_to_mem == 1'b1) begin
+                    discard_store_buffer_o[rob_d[i].store_buffer_idx] = 1'b1;
                 end
 
                 rob_d[i].valid      = 1'b0;
@@ -215,4 +218,6 @@ module rob
             end
         end
     end
+
+    assign still_alive_o = rob_d[check_alive_i].valid;
 endmodule

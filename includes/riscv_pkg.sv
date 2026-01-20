@@ -9,7 +9,8 @@ package riscv_pkg;
         OP_ALU     = 7'b0110011,
         OP_LUI     = 7'b0110111,
         OP_BRANCH  = 7'b1100011,
-        OP_JAL     = 7'b1101111
+        OP_JAL     = 7'b1101111,
+        OP_JALR    = 7'b1100111
     } opcode_t;
 
     typedef enum logic [2:0] {

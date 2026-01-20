@@ -50,7 +50,7 @@ module dcache
 
     bus32_t line_aligned_addr;
     assign line_aligned_addr = {addr_i[31:OFFSET_BITS], {OFFSET_BITS{1'b0}}};
-    assign mem_addr_o = line_aligned_addr;
+    //assign mem_addr_o = line_aligned_addr;
 
     logic hit;
     logic [ASSOCIATIVITY-1:0] hit_way;
@@ -246,6 +246,14 @@ module dcache
                 end
             end
         endcase
+    end
+
+    always_comb begin
+        mem_addr_o = line_aligned_addr;
+
+        if (state == WRITE_BACK) begin
+            mem_addr_o = {cache_mem[pending_index][victim_way].tag, pending_index, {OFFSET_BITS{1'b0}}};
+        end
     end
 
 endmodule

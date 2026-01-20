@@ -129,13 +129,13 @@ module new_dcache
                     mem_we_o = 1'b1;
                     mem_data_wr_o = cache_mem[index].data;
                     mem_data_wr_o[32*word_offset +: 32] = data_wr_i;
-                    mem_addr_o = addr_i;
+                    mem_addr_o = {addr_i[31:OFFSET_BITS], {OFFSET_BITS{1'b0}}};
                 end
             end
             READ_MISS, WRITE_MISS: begin
                 if(mem_req_ready_i) begin
                     mem_req_valid_o = 1'b1;
-                    mem_addr_o = addr_i;
+                    mem_addr_o = {addr_i[31:OFFSET_BITS], {OFFSET_BITS{1'b0}}};
                     mem_we_o = 1'b0;
                 end else begin
                     mem_req_valid_o = 1'b0;

@@ -59,6 +59,7 @@ module new_dcache
         end
     end
 
+    assign ready_o = (state == IDLE) && ( (!valid_i) || (hit && !we_i) || (hit && we_i && mem_rsp_valid_i) );
 
     typedef enum logic [1:0] {
         IDLE,
@@ -107,7 +108,6 @@ module new_dcache
 
     always_comb begin
         data_rd_o = '0;
-        ready_o = 1'b0;
         mem_data_wr_o = '0;
         mem_we_o = '0;
         mem_req_valid_o = '0;
@@ -121,7 +121,6 @@ module new_dcache
                 // READ & HIT
                 if (valid_i && hit && !we_i) begin
                     data_rd_o = cache_mem[index].data[32*word_offset +: 32];
-                    ready_o = 1'b1;
                 // WRITE & HIT
                 end else if (valid_i && hit && we_i) begin
                     line[32*word_offset +: 32] = data_wr_i;
@@ -131,10 +130,6 @@ module new_dcache
                     mem_data_wr_o = cache_mem[index].data;
                     mem_data_wr_o[32*word_offset +: 32] = data_wr_i;
                     mem_addr_o = addr_i;
-
-                    if (mem_req_ready_i) begin
-                        ready_o = 1'b1;
-                    end
                 end
             end
             READ_MISS, WRITE_MISS: begin
@@ -155,7 +150,6 @@ module new_dcache
             end
             default: begin
                 data_rd_o = '0;
-                ready_o = 1'b0;
                 mem_data_wr_o = '0;
                 mem_we_o = '0;
                 mem_req_valid_o = '0;

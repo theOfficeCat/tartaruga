@@ -1,4 +1,4 @@
-module tb_new_dcache;
+module tb_dcache;
     import tartaruga_pkg::*;
 
     logic clk_i;
@@ -21,7 +21,7 @@ module tb_new_dcache;
     logic mem_rsp_ready_o;
     bus32_t mem_rsp_addr_i;
 
-    new_dcache dut (
+    dcache dut (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .addr_i(addr_i),

@@ -79,7 +79,7 @@ module mem
     );
 
 
-    new_dcache dcache_inst (
+    dcache dcache_inst (
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .addr_i(dcache_addr),

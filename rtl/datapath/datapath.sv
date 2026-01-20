@@ -128,6 +128,8 @@ module datapath
         end
     end
 
+    bus32_t mtval_decode;
+
     // Decode
     decode_to_exe_t decode_to_exe_d, decode_to_exe_q;
 
@@ -135,11 +137,16 @@ module datapath
 
     bus32_t regfile_rs1_data, regfile_rs2_data;
 
+    logic csr_read_valid;
+    bus32_t csr_read_data;
+
     decoder decoder_inst (
         .pc_i(pc_decode),
         .instr_i(instruction_q),
         .rob_idx_i(rob_entry_decode),
         .id_decode_i(id_decode),
+        .mtval_i(mtval_decode),
+        .csr_illegal_i(!csr_read_valid),
         .xcpt_i(xcpt_decode),
         .xcpt_code_i(xcpt_code_decode),
         .instr_decoded_o(decode_to_exe_d.instr)
@@ -166,18 +173,20 @@ module datapath
         .clk_i(clk_i),
         .rstn_i(rstn_i),
 
-        .csr_read_i(),
-        .csr_write_i(),
-        .csr_addr_i(),
-        .csr_write_data_i(),
+        .csr_read_i(decode_to_exe_d.instr.is_csr),
+        .csr_write_i(1'b0),
+        .csr_addr_rd_i(decode_to_exe_d.csr_addr),
+        .csr_addr_wr_i(12'b0),
+        .csr_write_data_i('0),
 
         .xcpt_i(commit_xcpt),
         .xcpt_code_i(commit_xcpt_code),
         .xcpt_pc_i(commit_pc),
-        .xcpt_value_i(),
+        .xcpt_value_i('0),
 
-        .csr_read_valid_o(),
-        .csr_read_data_o()
+        .csr_read_valid_o(csr_read_valid),
+        .csr_read_data_o(csr_read_data),
+        .csr_mtval_o(mtval_decode)
     );
 
     logic stall;
@@ -197,6 +206,8 @@ module datapath
     logic solved_hazard;
 
     assign solved_hazard = solved_hazard_rs1 & solved_hazard_rs2;
+
+    assign decode_to_exe_d.csr_addr = decode_to_exe_d.immediate[11:0];
 
     always_comb begin
         decode_to_exe_d.data_rs1 = regfile_rs1_data;
@@ -328,6 +339,7 @@ module datapath
         .new_pc_i(mem_to_wb_q.branched_pc),
         .branch_taken_i(mem_to_wb_q.branch_taken),
         .store_buffer_idx_i(mem_to_wb_q.store_buffer_idx),
+        .mtval_i(mem_to_wb_q.instr.mtval),
 
         .check_alive_i(check_alive),
         .still_alive_o(still_alive),

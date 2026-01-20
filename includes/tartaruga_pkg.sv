@@ -160,6 +160,12 @@ package tartaruga_pkg;
         xcpt_code_t xcpt_code;
     } rob_entry_t;
 
+    typedef logic[11:0] csr_addr_t;
+
+    parameter csr_addr_t CSR_MEPCT_ADDR = 12'h341;
+    parameter csr_addr_t CSR_MCAUSE_ADDR = 12'h342;
+    parameter csr_addr_t CSR_MTVAL_ADDR = 12'h343;
+
     typedef struct packed {
         bus32_t pc;
         instruction_t instr;
@@ -187,6 +193,10 @@ package tartaruga_pkg;
 
         logic xcpt;
         xcpt_code_t xcpt_code;
+        bus32_t mtval;
+
+        logic is_csr;
+        logic we_csr;
     } instr_data_t;
 
     typedef struct packed {
@@ -195,6 +205,7 @@ package tartaruga_pkg;
         bus32_t data_rs1;
         bus32_t data_rs2;
         bus32_t immediate;
+        csr_addr_t csr_addr;
     } decode_to_exe_t;
 
     typedef struct packed {
@@ -240,12 +251,16 @@ package tartaruga_pkg;
             rob_idx:       '0,
             kanata_id:     '0,
             xcpt:          1'b0,
-            xcpt_code:     XCPT_ILLEGAL_INSTR
+            xcpt_code:     XCPT_ILLEGAL_INSTR,
+            mtval:         '0,
+            is_csr:        1'b0,
+            we_csr:        1'b0
         },
         valid:     1'b0,
         data_rs1:  '0,
         data_rs2:  '0,
-        immediate: '0
+        immediate: '0,
+        csr_addr:  CSR_MCAUSE_ADDR
     };
 
 

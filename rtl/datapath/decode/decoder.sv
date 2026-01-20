@@ -6,6 +6,10 @@ module decoder
     input instruction_t instr_i,
     input rob_idx_t rob_idx_i,
     input int id_decode_i,
+
+    input bus32_t mtval_i,
+    input logic csr_illegal_i,
+
     input logic xcpt_i,
     input xcpt_code_t xcpt_code_i,
     output instr_data_t instr_decoded_o
@@ -28,6 +32,9 @@ module decoder
         instr_decoded_o.kanata_id = id_decode_i;
         instr_decoded_o.xcpt = xcpt_i;
         instr_decoded_o.xcpt_code = xcpt_code_i;
+        instr_decoded_o.mtval = mtval_i;
+        instr_decoded_o.is_csr = 1'b0;
+        instr_decoded_o.we_csr = 1'b0;
 
         instr_decoded_o.write_enable = 1'b0;
         instr_decoded_o.rs1_or_pc = RS1;
@@ -297,6 +304,25 @@ module decoder
                 instr_decoded_o.store_to_mem = 1'b0;
                 instr_decoded_o.jump_kind = JUMP;
             end
+            OP_CSR: begin
+                instr_decoded_o.is_csr = 1'b1;
+
+                instr_decoded_o.write_enable = !csr_illegal_i;
+                instr_decoded_o.rs1_or_pc = RS1;
+                instr_decoded_o.rs2_or_imm = IMM;
+                instr_decoded_o.alu_op = ADD; // Not really used
+                instr_decoded_o.wb_origin = ALU; // Not really used
+                instr_decoded_o.store_to_mem = 1'b0;
+                instr_decoded_o.jump_kind = BNONE;
+
+                if (instr_i.itype.rs1 != 5'b0) begin // only CSR read, not from spec
+                    instr_decoded_o.we_csr = 1'b1;
+                end
+
+                if (instr_i.itype.func3 != F3_CSRRW) begin
+                    illegal_instr = 1'b1;
+                end
+                end
             default: begin
                 illegal_instr = 1'b1;
             end
@@ -310,6 +336,8 @@ module decoder
                 instr_decoded_o.addr_rs1 = '0;
                 instr_decoded_o.addr_rs2 = '0;
                 instr_decoded_o.addr_rd = '0;
+                //instr_decoded_o.write_enable = 1'b0;
+                //instr_decoded_o.is_csr = 1'b0;
             end
 
         end

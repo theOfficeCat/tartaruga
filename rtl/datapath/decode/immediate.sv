@@ -14,6 +14,9 @@ module immediate
             OP_ALU_I, OP_LW, OP_JALR: begin // All the instructions use the sign-extended value of the immediate. As the sifts ose only the 5 LSB and the MSB of the imm is 0 we can reuse the same extender
                 imm_o = {{20{instr_i.instr.itype.imm[31]}}, instr_i.instr.itype.imm};
             end
+            OP_CSR: begin
+                imm_o = {20'b0, instr_i.instr.itype.imm};
+            end
             OP_SW: begin
                 imm_o = {{20{instr_i.instr.stype.imm5[31]}}, instr_i.instr.stype.imm5, instr_i.instr.stype.imm0};
             end

@@ -25,6 +25,7 @@ module rob
     input bus32_t        new_pc_i,
     input logic          branch_taken_i,
     input store_buffer_idx_t store_buffer_idx_i,
+    input bus32_t        mtval_i,
 
     input rob_idx_t      check_alive_i,
     output logic         still_alive_o,
@@ -100,7 +101,7 @@ module rob
             rob_d[rob_entry_commit_i].completed    = 1'b1;
             rob_d[rob_entry_commit_i].result       = result_i;
             rob_d[rob_entry_commit_i].store_buffer_idx = store_buffer_idx_i;
-            rob_d[rob_entry_commit_i].new_pc       = (xcpt_i == 1'b1) ? ADDR_XCPT : new_pc_i;
+            rob_d[rob_entry_commit_i].new_pc       = (xcpt_i == 1'b1) ? mtval_i : new_pc_i;
             rob_d[rob_entry_commit_i].branch_taken = (xcpt_i == 1'b1) ? 1'b1 : branch_taken_i;
             rob_d[rob_entry_commit_i].xcpt        = xcpt_i;
             rob_d[rob_entry_commit_i].xcpt_code   = xcpt_code_i;

@@ -10,8 +10,13 @@ package riscv_pkg;
         OP_LUI     = 7'b0110111,
         OP_BRANCH  = 7'b1100011,
         OP_JAL     = 7'b1101111,
-        OP_JALR    = 7'b1100111
+        OP_JALR    = 7'b1100111,
+        OP_CSR     = 7'b1110011
     } opcode_t;
+
+    typedef enum logic [2:0] {
+        F3_CSRRW  = 3'b001
+    } f3_csr_t;
 
     typedef enum logic [2:0] {
         F3_ADD_SUB = 3'b000,
@@ -50,10 +55,4 @@ package riscv_pkg;
     // We can reuse the one for the ALU without immediate
 
     bus32_t NOP_INSTR_HEX = 32'h00000033;
-
-    typedef enum logic [11:0] {
-        CSR_MEPCT_ADDR  = 12'h341,
-        CSR_MCAUSE_ADDR = 12'h342
-    } csr_addr_t;
-
 endpackage

@@ -403,7 +403,15 @@ module decoder
                 instr_decoded_o.wb_origin = PC_4;
                 instr_decoded_o.store_to_mem = 1'b0;
                 instr_decoded_o.jump_kind = JUMP;
-
+            end
+            OP_JALR: begin
+                instr_decoded_o.write_enable = 1'b1;
+                instr_decoded_o.rs1_or_pc = RS1;
+                instr_decoded_o.rs2_or_imm = IMM;
+                instr_decoded_o.alu_op = ADD;
+                instr_decoded_o.wb_origin = PC_4;
+                instr_decoded_o.store_to_mem = 1'b0;
+                instr_decoded_o.jump_kind = JUMP;
             end
             default: begin
                 // illegal instruction treated as NOP being a x0 + x0

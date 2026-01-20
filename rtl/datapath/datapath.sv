@@ -242,6 +242,8 @@ module datapath
         end
     end
 
+    rob_idx_t check_alive;
+    logic still_alive;
 
     // Mem
     mem_to_wb_t mem_to_wb_d, mem_to_wb_q;
@@ -252,6 +254,8 @@ module datapath
         .exe_to_mem_i(exe_to_mem_q),
         .mem_to_wb_o(mem_to_wb_d),
         .stall_o(stall_from_mem),
+        .check_alive_o(check_alive),
+        .still_alive_i(still_alive),
         .commited_store_buffer_i(commit_store_to_mem),
         .commited_store_buffer_idx_i(commit_store_buffer_idx),
         .discard_store_buffer_i(discard_store_buffer)
@@ -285,6 +289,9 @@ module datapath
         .new_pc_i(mem_to_wb_q.branched_pc),
         .branch_taken_i(mem_to_wb_q.branch_taken),
         .store_buffer_idx_i(mem_to_wb_q.store_buffer_idx),
+
+        .check_alive_i(check_alive),
+        .still_alive_o(still_alive),
 
         .commit_valid_o(commit_valid),
         .commit_pc_o(commit_pc),

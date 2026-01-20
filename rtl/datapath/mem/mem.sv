@@ -7,6 +7,9 @@ module mem
     output mem_to_wb_t mem_to_wb_o,
     output stall_o,
 
+    output rob_idx_t check_alive_o,
+    input  logic still_alive_i,
+
     input logic commited_store_buffer_i,
     input store_buffer_idx_t commited_store_buffer_idx_i,
     input logic [STORE_BUFFER_SIZE-1:0] discard_store_buffer_i
@@ -63,7 +66,7 @@ module mem
         .load_i(is_load),
         .bypass_o(bypass_from_sb),
         .data_rd_o(data_from_sb),
-        .req_valid_i(is_store),
+        .req_valid_i(is_store && still_alive_i),
         .req_ready_o(sb_ready),
         .rsp_valid_o(sb_rsp_valid),
         .rsp_ready_i(dcache_ready),
@@ -123,8 +126,10 @@ module mem
                 $display("Error");
                 $finish();
             end
+        end else if (sb_rsp_valid && sb_out_addr == 32'h40000004) begin
+            $display("Output: %d", dcache_wr_data);
         end
-        end
+    end
 
     assign mem_to_wb_o.instr = exe_to_mem_i.instr;
 
@@ -133,7 +138,7 @@ module mem
     logic valid_load;
 
     assign valid_no_mem = exe_to_mem_i.valid && (exe_to_mem_i.instr.wb_origin != MEM) && exe_to_mem_i.instr.store_to_mem == 1'b0;
-    assign valid_store  = exe_to_mem_i.valid && (exe_to_mem_i.instr.store_to_mem == 1'b1) && dcache_ready;
+    assign valid_store  = exe_to_mem_i.valid && (exe_to_mem_i.instr.store_to_mem == 1'b1) && sb_ready;
 
     //assign valid_load   = exe_to_mem_i.valid && (exe_to_mem_i.instr.wb_origin == MEM) && dcache_ready;
 
@@ -173,5 +178,7 @@ module mem
             end
         endcase
     end
+
+    assign check_alive_o = exe_to_mem_i.instr.rob_idx;
 
 endmodule

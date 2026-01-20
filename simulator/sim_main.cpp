@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
     uint32_t cycles_without_commit = 0;
     uint32_t total_cycles = 0;
     uint32_t commited_instructions = 0;
-    while (!Verilated::gotFinish() && cycles_without_commit <= 100 && main_time < 100000) {
+    while (!Verilated::gotFinish() && cycles_without_commit <= 100) {
         // clock negativo
         top->clk_i = 0;
         top->eval();

@@ -15,7 +15,7 @@ module dcache
     input  logic mem_req_ready_i,
     input  logic [127:0] mem_data_line_i,
     output logic mem_we_o,
-    output bus32_t mem_data_wr_o,
+    output logic [127:0] mem_data_wr_o,
     input  logic mem_rsp_valid_i,
     output logic mem_rsp_ready_o,
     input  bus32_t mem_rsp_addr_i
@@ -106,7 +106,7 @@ module dcache
     assign mem_req_valid_o = (state == READ_MISS || state == WRITE_MISS || state == WRITE_BACK) && mem_req_ready_i;
     assign mem_we_o = (state == WRITE_BACK);
 
-    assign mem_data_wr_o = (state == WRITE_BACK) ? victim_data_line[31:0] : data_wr_i;
+    assign mem_data_wr_o = (state == WRITE_BACK) ? victim_data_line : data_wr_i;
 
     assign mem_rsp_ready_o = 1'b1;
 

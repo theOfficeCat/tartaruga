@@ -52,7 +52,7 @@ module csr
         if (~rstn_i) begin
             mepc   <= 32'b0;
             mcause <= 32'b0;
-            mtval  <= 32'b0;
+            mtval  <= 32'h00002000;
         end else begin
             // Exception handling
             if (xcpt_i) begin

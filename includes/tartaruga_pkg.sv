@@ -148,6 +148,7 @@ package tartaruga_pkg;
         reg_addr_t addr_rd;
         logic write_enable;
         logic store_to_mem;
+        logic is_csr;
         bus32_t result;
         bus32_t new_pc;
         logic branch_taken;

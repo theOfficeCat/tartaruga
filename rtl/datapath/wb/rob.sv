@@ -15,6 +15,7 @@ module rob
     input logic          write_enable_i,
     input logic          store_to_mem_i,
     input int            kanata_id_i,
+    input logic          is_csr_i,
 
     output rob_idx_t     rob_entry_alloc_o,
 
@@ -50,6 +51,8 @@ module rob
     output xcpt_code_t   commit_xcpt_code_o,
 
     output logic         rob_full_o,
+    output logic         rob_empty_o,
+    output logic         valid_csr_o,
 
     input  reg_addr_t     rs1_addr_i,
     output logic          hazard_rs1_o,
@@ -71,6 +74,7 @@ module rob
 
     assign rob_entry_alloc_o = tail_ptr_q;
     assign rob_full_o = (((tail_ptr_q + 1) % ROB_SIZE) == head_ptr_q) && rob_q[head_ptr_q].valid; // Full when next tail equals head and head is valid
+    assign rob_empty_o = (tail_ptr_q == head_ptr_q); // The only case where the two pointers are equal is when empty
 
     logic found_hazard_rs1;
     logic found_hazard_rs2;
@@ -88,6 +92,7 @@ module rob
             rob_d[tail_ptr_q].addr_rd       = rd_addr_i;
             rob_d[tail_ptr_q].write_enable  = write_enable_i;
             rob_d[tail_ptr_q].store_to_mem  = store_to_mem_i;
+            rob_d[tail_ptr_q].is_csr        = is_csr_i;
             rob_d[tail_ptr_q].completed     = 1'b0; // Just in case a previous moment it was completed and flushed
             rob_d[tail_ptr_q].kanata_id     = kanata_id_i;
 
@@ -202,6 +207,12 @@ module rob
                     //break;
                 end
             end
+        end
+
+        valid_csr_o = 1'b0;
+
+        for (int i = 0; i < ROB_SIZE; i++) begin
+            valid_csr_o |= rob_q[i].valid && rob_q[i].is_csr;
         end
     end
 

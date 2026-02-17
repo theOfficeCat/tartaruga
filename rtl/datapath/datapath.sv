@@ -48,7 +48,7 @@ module datapath
     logic commit_xcpt;
     xcpt_code_t commit_xcpt_code;
 
-    logic rob_full;
+    logic rob_full, rob_empty;
 
     logic valid_fetch, valid_decode, valid_exe, valid_mem, valid_wb;
     bus32_t pc_fetch, pc_decode, pc_exe, pc_mem, pc_wb;
@@ -202,6 +202,8 @@ module datapath
 
     logic stall_from_exe, stall_from_mem;
 
+    logic rob_csr;
+
     logic solved_hazard_rs1, solved_hazard_rs2;
     logic solved_hazard;
 
@@ -247,7 +249,7 @@ module datapath
         end
     end
 
-    assign stall = (hazard_rob & ~solved_hazard) | stall_from_exe | (~valid_fetch) | rob_full | stall_from_mem;
+    assign stall = (hazard_rob & ~solved_hazard) | stall_from_exe | (~valid_fetch) | rob_full | stall_from_mem | (decode_to_exe_d.instr.is_csr && !rob_empty) | rob_csr;
 
     assign decode_to_exe_d.valid = ~stall & valid_decode & ~commit_branch_taken;
 
@@ -330,6 +332,7 @@ module datapath
         .write_enable_i(decode_to_exe_d.instr.write_enable),
         .store_to_mem_i(decode_to_exe_d.instr.store_to_mem),
         .kanata_id_i(decode_to_exe_d.instr.kanata_id),
+        .is_csr_i(decode_to_exe_d.instr.is_csr),
 
         .rob_entry_alloc_o(rob_entry_decode),
 
@@ -362,6 +365,8 @@ module datapath
         .commit_xcpt_code_o(commit_xcpt_code),
 
         .rob_full_o(rob_full),
+        .rob_empty_o(rob_empty),
+        .valid_csr_o(rob_csr),
 
         .rs1_addr_i(decode_to_exe_d.instr.addr_rs1),
         .hazard_rs1_o(hazard_rob_rs1),

@@ -37,8 +37,8 @@ module store_buffer
     store_buffer_entry_t store_buffer_q [STORE_BUFFER_SIZE-1:0];
     store_buffer_entry_t store_buffer_d [STORE_BUFFER_SIZE-1:0];
 
-    rob_idx_t head_ptr_q, head_ptr_d;
-    rob_idx_t tail_ptr_q, tail_ptr_d;
+    store_buffer_idx_t head_ptr_q, head_ptr_d;
+    store_buffer_idx_t tail_ptr_q, tail_ptr_d;
 
     // Sequential logic
     always_ff @(posedge clk_i or negedge rstn_i) begin
